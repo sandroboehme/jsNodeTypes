@@ -27,7 +27,7 @@ limitations under the License.
 
 
 <script type="text/javascript" src="../js/jsnodetypes.js"></script>
-<script type="text/javascript" src="../example/json2.js"></script>
+<script type="text/javascript" src="../documentation/json2.js"></script>
 
 <style type="text/css">
 #main {
@@ -146,15 +146,9 @@ function loadPropertyDefs(){
 		<h2>License</h2>
 		<p>This library is licensed under the terms of the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2 license</a>.</p>
 		<h2>Compatibility</h2>
-		<p>
-		    	// Supported since IE8 
-		    	// see http://msdn.microsoft.com/en-us/library/cc836466%28v=vs.85%29.aspx
-		    	// other browsers: http://caniuse.com/#search=JSON.parse
-		    	JSON.parse
-		    	IE 8.0 standards mode, Firefox 20.0, Chrome 26.0, Opera 12.1, Safari 5.1
-		    	</p>
+		<p>This library has out of the box support for: IE 8.0 standards mode, Firefox 20.0, Chrome 26.0, Opera 12.1 and Safari 5.1</p>
 		<h3>Support for older browser versions</h3>
-		<p>If you would like to support older browser versions can download the <a href="https://raw.github.com/douglascrockford/JSON-js/master/json2.js">json2.js script</a> and include it like that:</p>
+		<p>If you would like to support older browser versions you can download the <a href="https://raw.github.com/douglascrockford/JSON-js/master/json2.js">json2.js script</a> and include it like that:</p>
 		<div class="code">
 			<pre class="JavaScript">&lt;script type="text/javascript" src="/path/to/json2.js"&gt;&lt;/script&gt;</pre>
 		</div>
@@ -162,7 +156,7 @@ function loadPropertyDefs(){
 		<ol>
 			<li>Add <pre>http://www.jcrbrowser.org/sling/obr/repository.xml</pre> to your OSGi Bundle repository in the web console (/system/console/obr)</li>
 			<li>In the resource 'J' navigate to 'jsNodeTypes' and 'Deploy and Start' the bundle</li>
-			<li>At <pre>/libs/jsnodetypes/content/example.html</pre> you should be able to see and use this page.</li> 
+			<li>At <pre>/libs/jsnodetypes/content/documentation.html</pre> you should be able to see and use this page.</li> 
 		</ol>
 		<h2>Use</h2>
 		<ol>
@@ -175,27 +169,24 @@ function loadPropertyDefs(){
 			<li>
 				<p>Instantiate the NodeTypeManager:</p>
 				<div class="code">
-					<pre class="JavaScript">
-						// this works your your WAR is deployed under the root context '/'
-						var ntManager = new org.jcrbrowser.NodeTypeManager();
+					<pre class="JavaScript">// this works your your WAR is deployed under the root context '/'
+var ntManager = new org.jcrbrowser.NodeTypeManager();
 					</pre>
 				</div>
 				<p>If your WAR is not deployed under the root context you have to specify it:</p>
 				<div class="code">
-					<pre class="JavaScript">
-						var settings = {"contextPath": "/yourContextPath"};
-						var ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+					<pre class="JavaScript">var settings = {"contextPath": "/yourContextPath"};
+var ntManager = new org.jcrbrowser.NodeTypeManager(settings);
 					</pre>
 				</div>
 			</li>
 			<li>
 				<p>Use the NodeTypeManager instance like described above:</p>
 				<div class="code">
-					<pre class="JavaScript">
-						var nodeTypesArray = ntManager.getNodeTypeNames();
-						var firstNodeType = ntManager.getNodeType(nodeTypesArray[0]);
-						var allChildNodeDefs = firstNodeType.getAllChildNodeDefinitions();
-						var allPropertyDefs = firstNodeType.getAllPropertyDefinitions();
+					<pre class="JavaScript">var nodeTypesArray = ntManager.getNodeTypeNames();
+var firstNodeType = ntManager.getNodeType(nodeTypesArray[0]);
+var allChildNodeDefs = firstNodeType.getAllChildNodeDefinitions();
+var allPropertyDefs = firstNodeType.getAllPropertyDefinitions();
 					</pre>
 				</div>
 			</li>
@@ -215,16 +206,16 @@ function loadPropertyDefs(){
 	 		<li>and returns the result back to the JavaScript client.</li>
 	 	</ul>
 	 	<p>When <code>ntManager.getNodeType(nodeTypeName)</code> is called, the defaults are added again and 
-	 	the <code>getAllChildNodeDefinitions()</code> and <code>getAllPropertyDefinitions()</code> functions are added lazily to the JSON object / JavaScript object literal and returned.
+	 	the <code>getAllChildNodeDefinitions()</code> and <code>getAllPropertyDefinitions()</code> functions are added lazily to the JSON object / JavaScript object literal and are finally returned.
 	 	</p>
 		<h2>Tests</h2>
-		<p>The JavaScript tests and the Java tests are run in the Maven test phase as usual.
+		<p>All JavaScript tests and Java tests are run in the Maven test phase as usual.
 		<h3>JavaScript</h3>
-		<p>The JavaScript test are implemented in 'NodeTypesSpec.js' using <a href="http://pivotal.github.com/jasmine/">Jasmine</a>. When you call <code>mvn jasmine:bdd</code> you can edit the tests and refresh the browser at <code>http://localhost:8234</code> to rerun the tests. 
+		<p>The JavaScript tests are implemented in <code>src/test/javascript/NodeTypesSpec.js</code> using <a href="http://pivotal.github.com/jasmine/">Jasmine</a>. When you call <code>mvn jasmine:bdd</code> you can edit the tests and refresh the browser at <code>http://localhost:8234</code> to rerun the tests. 
 		<h3>Java</h3>
-		<p>The Java tests can be found in 'src/test/java/org/sboehme/jsnodetypes'. They query the NodeTypesJSONServlet while mocking the <code>javax.jcr.nodetype.NodeTypeManager</code> using <a href="http://docs.mockito.googlecode.com/hg/latest/org/mockito/Mockito.html">Mockito</a>.
-		The result is then compared to the expected values in the 'src/test/resources/expectedNTJSON/*.json' files using <code>org.sboehme.jsnodetypes.testJSONAssert</code>. This class is actually copied from 
-		<code>org.apache.sling.commons.json.test.JSONAssert</code>. If somebody knows a better way to reuse this class please let me know.
+		<p>The Java tests can be found in <code>src/test/java/org/sboehme/jsnodetypes</code>. They query the <code>org.sboehme.jsnodetypes.NodeTypesJSONServlet</code> while mocking the <code>javax.jcr.nodetype.NodeTypeManager</code> using <a href="http://docs.mockito.googlecode.com/hg/latest/org/mockito/Mockito.html">Mockito</a>.
+		The result is then compared to the expected values in the <code>src/test/resources/expectedNTJSON/*.json</code> files using <code>org.sboehme.jsnodetypes.testJSONAssert</code>. This class is actually copied from 
+		<code>org.apache.sling.commons.json.test.JSONAssert</code>. If somebody knows a better way to reuse this class please open an bug and let me know.
 		</p>
 		<h2>Build</h2>
 		<p>You can check out the sources from <code>https://github.com/sandroboehme/jsNodeTypes</code> and build them with Maven.</p>

@@ -16,18 +16,34 @@
 	<groupId>org.sboehme</groupId>
 	<artifactId>org.sboehme.jsnodetypes</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.0</version>
+	<version>1.0.1</version>
 
 	<name>jsNodeTypes</name>
 	<description>
 	Uses Apache Sling to generate a JavaScript representation of JCR node types.
     </description>
+    
+    <url>http://www.jcrbrowser.org/sling/libs/jsnodetypes/content/documentation.html</url>
+    
+    <licenses>
+	   <license>
+	     <name>The Apache Software License, Version 2.0</name>
+	     <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+	     <distribution>repo</distribution>
+	   </license>
+	</licenses>
 
 	<scm>
-		<developerConnection>scm:git:https://github.com/sandroboehme/js-node-types.git</developerConnection>
-		<url>https://github.com/sandroboehme/js-node-types</url>
+		<developerConnection>scm:git:https://github.com/sandroboehme/jsNodeTypes.git</developerConnection>
+		<url>https://github.com/sandroboehme/jsNodeTypes</url>
 	</scm>
 
+	<developers>
+		<developer>
+			<name>Sandro Boehme</name>
+		</developer>
+	</developers>
+	
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -112,6 +128,30 @@
 				<configuration>
 					<argLine>-Xmx448m</argLine>
 				</configuration>
+			</plugin>
+			<plugin>
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-source-plugin</artifactId>
+			  <executions>
+			    <execution>
+			      <id>attach-sources</id>
+			      <goals>
+			        <goal>jar</goal>
+			      </goals>
+			    </execution>
+			  </executions>
+			</plugin>
+			<plugin>
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-javadoc-plugin</artifactId>
+			  <executions>
+			    <execution>
+			      <id>attach-javadocs</id>
+			      <goals>
+			        <goal>jar</goal>
+			      </goals>
+			    </execution>
+			  </executions>
 			</plugin>
 		</plugins>
 		<extensions>
