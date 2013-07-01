@@ -16,7 +16,7 @@
 	<groupId>de.sandroboehme</groupId>
 	<artifactId>de.sandroboehme.jsnodetypes</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.0.1</version>
+	<version>1.0.1.SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -255,4 +255,17 @@
 			<url>dav:http://admin:admin@localhost:8080/sling6/obr</url>
 		</repository>
 	</distributionManagement>
+	<repositories>
+        <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype OSS Snapshot Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+              <enabled>false</enabled>
+            </releases>
+            <snapshots>
+              <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>
