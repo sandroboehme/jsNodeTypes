@@ -249,9 +249,13 @@
 		</dependency>
 	</dependencies>
 	<distributionManagement>
+<!-- 		<repository> -->
+<!-- 			<id>local8888</id> -->
+<!-- 			<url>dav:http://admin:admin@localhost:8080/sling6/obr</url> -->
+<!-- 		</repository> -->
 		<repository>
-			<id>local8888</id>
-			<url>dav:http://admin:admin@localhost:8080/sling6/obr</url>
+			<id>sonatype-nexus-staging</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
 		</repository>
 	</distributionManagement>
 	<repositories>
