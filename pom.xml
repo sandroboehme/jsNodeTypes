@@ -13,10 +13,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.sboehme</groupId>
-	<artifactId>org.sboehme.jsnodetypes</artifactId>
+	<groupId>de.sandroboehme</groupId>
+	<artifactId>de.sandroboehme.jsnodetypes</artifactId>
 	<packaging>bundle</packaging>
 	<version>1.0.1</version>
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
 
 	<name>jsNodeTypes</name>
 	<description>
@@ -34,7 +40,8 @@
 	</licenses>
 
 	<scm>
-		<developerConnection>scm:git:https://github.com/sandroboehme/jsNodeTypes.git</developerConnection>
+		<connection>scm:git:git@github.com:sandroboehme/jsNodeTypes.git</connection>
+		<developerConnection>scm:git:git@github.com:sandroboehme/jsNodeTypes.git</developerConnection>
 		<url>https://github.com/sandroboehme/jsNodeTypes</url>
 	</scm>
 
@@ -92,11 +99,11 @@
 				<configuration>
 					<instructions>
 						<Sling-Initial-Content>SLING-INF/libs/jsnodetypes;overwrite:=true;path:=/libs/jsnodetypes;uninstall:=true,SLING-INF/libs/jsnodetypes/documentation;overwrite:=true;path:=/libs/jsnodetypes/documentation;ignoreImportProviders:=json;uninstall:=true,SLING-INF/libs/jsnodetypes/js;overwrite:=true;path:=/libs/jsnodetypes/js;ignoreImportProviders:=json;uninstall:=true</Sling-Initial-Content>
-						<Export-Package>!org.sboehme.jsnodetypes</Export-Package>
+						<Export-Package>!de.sandroboehme.jsnodetypes</Export-Package>
 						<!-- TODO: Remove the negated export-package statement and use the private-package statement. For
 						some reason it doesn't work right now this ways. 
 						 -->
-<!-- 						<Private-Package>org.sboehme.jsnodetypes.*</Private-Package> -->
+<!-- 						<Private-Package>de.sandroboehme.jsnodetypes.*</Private-Package> -->
 					</instructions>
 				</configuration>
 			</plugin>

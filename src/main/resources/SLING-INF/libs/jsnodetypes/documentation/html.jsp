@@ -72,7 +72,7 @@ input {
 <script type="text/javascript">
 
 var settings = {"contextPath": "${pageContext.request.contextPath}"};
-var ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+var ntManager = new de.sandroboehme.NodeTypeManager(settings);
 
 function getNTNames(){
 	var ntNames = ntManager.getNodeTypeNames();
@@ -170,13 +170,13 @@ function loadPropertyDefs(){
 				<p>Instantiate the NodeTypeManager:</p>
 				<div class="code">
 					<pre class="JavaScript">// this works your your WAR is deployed under the root context '/'
-var ntManager = new org.jcrbrowser.NodeTypeManager();
+var ntManager = new de.sandroboehme.NodeTypeManager();
 					</pre>
 				</div>
 				<p>If your WAR is not deployed under the root context you have to specify it:</p>
 				<div class="code">
 					<pre class="JavaScript">var settings = {"contextPath": "/yourContextPath"};
-var ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+var ntManager = new de.sandroboehme.NodeTypeManager(settings);
 					</pre>
 				</div>
 			</li>
@@ -197,7 +197,7 @@ var allPropertyDefs = firstNodeType.getAllPropertyDefinitions();
 		I'm always looking forward to your feedback. Even if it's critique :-)</p> 
 		<h2>Architecture</h2>
 	 	<p>The JavaScript NodeTypeManager loads <a href="${pageContext.request.contextPath}/libs/jsnodetypes/content/nodetypes.json">all available node types from the server in the JSON format</a>.</p> 
-	 	<p>This is handled by the <code>org.sboehme.jsnodetypes.NodeTypesJSONServlet</code> at the server side. It</p> 
+	 	<p>This is handled by the <code>de.sandroboehme.jsnodetypes.NodeTypesJSONServlet</code> at the server side. It</p> 
 	 	<ul>
 	 		<li>reads the node types from the repository</li>
 	 		<li>converts them to JSON</li>
@@ -213,8 +213,8 @@ var allPropertyDefs = firstNodeType.getAllPropertyDefinitions();
 		<h3>JavaScript</h3>
 		<p>The JavaScript tests are implemented in <code>src/test/javascript/NodeTypesSpec.js</code> using <a href="http://pivotal.github.com/jasmine/">Jasmine</a>. When you call <code>mvn jasmine:bdd</code> you can edit the tests and refresh the browser at <code>http://localhost:8234</code> to rerun the tests. 
 		<h3>Java</h3>
-		<p>The Java tests can be found in <code>src/test/java/org/sboehme/jsnodetypes</code>. They query the <code>org.sboehme.jsnodetypes.NodeTypesJSONServlet</code> while mocking the <code>javax.jcr.nodetype.NodeTypeManager</code> using <a href="http://docs.mockito.googlecode.com/hg/latest/org/mockito/Mockito.html">Mockito</a>.
-		The result is then compared to the expected values in the <code>src/test/resources/expectedNTJSON/*.json</code> files using <code>org.sboehme.jsnodetypes.testJSONAssert</code>. This class is actually copied from 
+		<p>The Java tests can be found in <code>src/test/java/de/sandroboehme/jsnodetypes</code>. They query the <code>de.sandroboehme.jsnodetypes.NodeTypesJSONServlet</code> while mocking the <code>javax.jcr.nodetype.NodeTypeManager</code> using <a href="http://docs.mockito.googlecode.com/hg/latest/org/mockito/Mockito.html">Mockito</a>.
+		The result is then compared to the expected values in the <code>src/test/resources/expectedNTJSON/*.json</code> files using <code>de.sandroboehme.jsnodetypes.testJSONAssert</code>. This class is actually copied from 
 		<code>org.apache.sling.commons.json.test.JSONAssert</code>. If somebody knows a better way to reuse this class please open an bug and let me know.
 		</p>
 		<h2>Build</h2>

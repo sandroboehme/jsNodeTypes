@@ -15,9 +15,9 @@
 */
 
 // creating the namespace
-var org = org || {};
-org.jcrbrowser = org.jcrbrowser || {};
-var jcrbrowser = org.jcrbrowser;
+var de = de || {};
+de.sandroboehme = de.sandroboehme || {};
+var sandroboehme = de.sandroboehme;
 /*
  JSNodeTypes - The JavaScript Node Types library for Apache Sling
 
@@ -27,7 +27,7 @@ var jcrbrowser = org.jcrbrowser;
 */
 
 //defining the module
-org.jcrbrowser.NodeTypeManager = (function() {
+de.sandroboehme.NodeTypeManager = (function() {
 
 	function NodeTypeManager(settingsParameter){
 		// copies the setting parameters to the object scope and configures the defaults

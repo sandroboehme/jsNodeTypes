@@ -55,7 +55,7 @@ describe('The Node Type Manager', function() {
 				},"n4" : {
 				}} 
 		};
-		var ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+		var ntManager = new de.sandroboehme.NodeTypeManager(settings);
 		expect(ntManager.getNodeTypeNames()).toEqual(["n1","n2","n3","n4"]);
 	});
 
@@ -65,12 +65,12 @@ describe('The Node Type Manager', function() {
 				"nodeTypesJson" : {"aNodeType" : {
 				}} 
 		};
-		var ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+		var ntManager = new de.sandroboehme.NodeTypeManager(settings);
 		expect(ntManager.getNodeType("aNodeType")).toEqual(settings.nodeTypesJson["aNodeType"]);
 	});
 	
 	describe('collects', function () {
-		//var ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+		//var ntManager = new de.sandroboehme.NodeTypeManager(settings);
 		var ntManager;
 
 		function createChildNodeDef(name){
@@ -130,7 +130,7 @@ describe('The Node Type Manager', function() {
 							"declaredSupertypes" : []
 						}} 
 				};
-				ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+				ntManager = new de.sandroboehme.NodeTypeManager(settings);
 				var expectedChildNodeDefs = [{ name : 'childNodeDef1' }, {name : 'childNodeDef2' }, { name : 'childNodeDef3' }, { name : 'childNodeDef4' }, { name : 'childNodeDef5' }, { name : 'childNodeDef6' }, { name : 'childNodeDef7' }, { name : 'childNodeDef8' }];
 				var expectedChildNodeDefs = [createChildNodeDef('childNodeDef1'),createChildNodeDef('childNodeDef2'), createChildNodeDef('childNodeDef3'), createChildNodeDef('childNodeDef4'), createChildNodeDef('childNodeDef5'), createChildNodeDef('childNodeDef6'), createChildNodeDef('childNodeDef7'), createChildNodeDef('childNodeDef8')];
 				var resultingChildNodeDefs = ntManager.getNodeType("aNodeType").getAllChildNodeDefinitions();
@@ -157,7 +157,7 @@ describe('The Node Type Manager', function() {
 							"declaredSupertypes" : []
 						}} 
 				};
-				ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+				ntManager = new de.sandroboehme.NodeTypeManager(settings);
 				var expectedChildNodeDefs = [ 'childNodeDef1', 'childNodeDef2'];
 				var expectedChildNodeDefs = [createChildNodeDef('childNodeDef1'), createChildNodeDef('childNodeDef2')];
 				var resultingChildNodeDefs = ntManager.getNodeType("aNodeType").getAllChildNodeDefinitions();
@@ -192,7 +192,7 @@ describe('The Node Type Manager', function() {
 							"declaredSupertypes" : []
 						}} 
 				};
-				ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+				ntManager = new de.sandroboehme.NodeTypeManager(settings);
 		
 				var expectedChildNodeDefs = [createChildNodeDef('childNodeDef1'), createChildNodeDef('childNodeDef2'), createChildNodeDef('childNodeDef3'), createChildNodeDef('childNodeDef4'), createChildNodeDef('childNodeDef5'), createChildNodeDef('childNodeDef6') ];
 	
@@ -235,7 +235,7 @@ describe('The Node Type Manager', function() {
 							"declaredSupertypes" : []
 						}}
 				};
-				ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+				ntManager = new de.sandroboehme.NodeTypeManager(settings);
 				var expectedPropertyDefs = [createPropertyDef('propertyDef1'), createPropertyDef('propertyDef2'), createPropertyDef('propertyDef3'), createPropertyDef('propertyDef4'), createPropertyDef('propertyDef5'), createPropertyDef('propertyDef6'), createPropertyDef('propertyDef7'), createPropertyDef('propertyDef8') ];
 				var resultingPropertyDefs = ntManager.getNodeType("aNodeType").getAllPropertyDefinitions();
 				sameArrayContent(expectedPropertyDefs, resultingPropertyDefs);
@@ -268,7 +268,7 @@ describe('The Node Type Manager', function() {
 							"declaredSupertypes" : []
 						}}
 				};
-				ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+				ntManager = new de.sandroboehme.NodeTypeManager(settings);
 				var expectedPropertyDefs = [createPropertyDef('propertyDef1'), createPropertyDef('propertyDef2') ];
 				var resultingPropertyDefs = ntManager.getNodeType("aNodeType").getAllPropertyDefinitions();
 				sameArrayContent(expectedPropertyDefs, resultingPropertyDefs);
@@ -302,7 +302,7 @@ describe('The Node Type Manager', function() {
 							"declaredSupertypes" : []
 						}}
 				};
-				ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+				ntManager = new de.sandroboehme.NodeTypeManager(settings);
 				var expectedPropertyDefs = [createPropertyDef('propertyDef1'), createPropertyDef('propertyDef2'), createPropertyDef('propertyDef3'), createPropertyDef('propertyDef4'), createPropertyDef('propertyDef5'), createPropertyDef('propertyDef6')];
 				var resultingPropertyDefs = ntManager.getNodeType("aNodeType").getAllPropertyDefinitions();
 				sameArrayContent(expectedPropertyDefs, resultingPropertyDefs);
@@ -323,7 +323,7 @@ describe('The Node Type Manager', function() {
 					}
 				} 
 		};
-		var ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+		var ntManager = new de.sandroboehme.NodeTypeManager(settings);
 		
 		it('for the properties at the node type level', function() {
 			compareNodeTypeProperties(ntManager.getNodeType("nt"), ntManager.internalGetDefaultNodeType())
@@ -339,7 +339,7 @@ describe('The Node Type Manager', function() {
 		});
 		
 		describe('for the properties at the child node definition level', function() {
-			ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+			ntManager = new de.sandroboehme.NodeTypeManager(settings);
 			it('that do inherit from item definition', function() {
 				compareChildNodeDefProperties(ntManager.getNodeType("nt").getAllChildNodeDefinitions(), ntManager.internalGetDefaultNodeType().declaredChildNodeDefinitions);
 			});
@@ -395,7 +395,7 @@ describe('The Node Type Manager', function() {
 					}
 			} 
 		};
-		var ntManager = new org.jcrbrowser.NodeTypeManager(settings);
+		var ntManager = new de.sandroboehme.NodeTypeManager(settings);
 
 		it('for the properties at the node type level', function() {
 			compareNodeTypeProperties(ntManager.getNodeType("nt"), settings.nodeTypesJson.nt)
