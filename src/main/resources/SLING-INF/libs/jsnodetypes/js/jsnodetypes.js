@@ -33,10 +33,10 @@ de.sandroboehme.NodeTypeManager = (function() {
 		// copies the setting parameters to the object scope and configures the defaults
 		
 		var noSettingsProvided = typeof settingsParameter === 'undefined' || settingsParameter == null;
-		var contextPath = (noSettingsProvided || typeof settingsParameter.contextPath === 'undefined') ? '/' : settingsParameter.contextPath+"/";
+		var contextPath = (noSettingsProvided || typeof settingsParameter.contextPath === 'undefined') ? '' : settingsParameter.contextPath;
 		var defaultNTJsonURL = (noSettingsProvided || typeof settingsParameter.defaultNTJsonURL === 'undefined') ? contextPath+'/libs/jsnodetypes/js/defaultNT/defaultNT.json' : settingsParameter.defaultNTJsonURL;
 		this.defaultNTJson = getJson(defaultNTJsonURL);
-		this.nodeTypesJson = (noSettingsProvided || typeof settingsParameter.nodeTypesJson === 'undefined') ? getJson(contextPath+'libs/jsnodetypes/content/nodetypes.json') : settingsParameter.nodeTypesJson; 
+		this.nodeTypesJson = (noSettingsProvided || typeof settingsParameter.nodeTypesJson === 'undefined') ? getJson(contextPath+'/libs/jsnodetypes/content/nodetypes.json') : settingsParameter.nodeTypesJson; 
 	};
 	
 	function getJson(url){
