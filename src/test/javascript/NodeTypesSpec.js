@@ -421,6 +421,107 @@ describe('The Node Type Manager', function() {
 		});			
 	});
 
+	describe('checks in canAddChildNode()', function () {
+
+		var settings = {
+				"defaultNTJsonURL": defaultNTJsonURL,
+				"nodeTypesJson" : {
+					"ntResidualChild": {
+					    "declaredChildNodeDefinitions": [
+					      {
+					        "requiredPrimaryTypes": [
+					          "nt:base"
+					        ],
+					    	"name" : "*"
+					      }
+					    ]
+					  },
+					"ntNonResidualChild": {
+					    "declaredChildNodeDefinitions": [
+					      {
+					        "requiredPrimaryTypes": [
+					          "nt:base"
+					        ],
+					    	"name" : "aChildNodeDef1"
+					      }
+					    ]
+					  },
+					"ntNonResidualProtectedChild": {
+					    "declaredChildNodeDefinitions": [
+					      {
+					        "requiredPrimaryTypes": [
+					          "nt:base"
+					        ],
+					    	"name" : "aChildNodeDef2",
+					        "protected": true
+					      }
+					    ]
+					  },
+					"ntWithOtherChildNode": {
+					    "declaredChildNodeDefinitions": [
+					      {
+					        "requiredPrimaryTypes": [
+					          "otherNodeType", "unknownNodeType"
+					        ],
+					    	"name" : "*"
+					      }
+					    ]
+					  },
+					"ntWithUndefinedChildNode": {
+					    "declaredChildNodeDefinitions": [
+					      {
+					        "requiredPrimaryTypes": [
+					          "undefined"
+					        ],
+					    	"name" : "*"
+					      }
+					    ]
+					  },
+					"nt:base" : {
+					},
+					"otherNodeType" : {
+					},
+					"inheritedNodeType" : {
+					    "declaredSupertypes": [
+						 					      "otherNodeType"
+						 					    ]
+					}
+			}
+		};
+		var ntManager = new de.sandroboehme.NodeTypeManager(settings);
+		var ntBase = ntManager.getNodeType("nt:base");
+		var ntResidualChild = ntManager.getNodeType("ntResidualChild");
+		
+		describe('if the name is valid', function() {
+			it('for residual node names', function() {
+				expect(ntManager.getNodeType("ntResidualChild").canAddChildNode("childNodeDefName", ntBase)).toBe(true);
+			});
+			it('for non residual node names', function() {
+				expect(ntManager.getNodeType("ntNonResidualChild").canAddChildNode("aChildNodeDef1", ntBase)).toBe(true);
+				expect(ntManager.getNodeType("ntNonResidualChild").canAddChildNode("aChildNodeDefA", ntBase)).toBe(false);
+			});
+		});
+		it('if the destination is not protected', function() {
+			expect(ntManager.getNodeType("ntNonResidualProtectedChild").canAddChildNode("aChildNodeDef2", ntResidualChild)).toBe(false);
+		});
+		describe('if the type is valid', function() {
+			it('for direct types', function() {
+				var otherNodeType = ntManager.getNodeType("otherNodeType");
+				expect(ntManager.getNodeType("ntWithOtherChildNode").canAddChildNode("otherNodeType", otherNodeType)).toBe(true);
+				expect(ntManager.getNodeType("ntWithOtherChildNode").canAddChildNode("otherNodeType", ntBase)).toBe(false);
+			});
+			it('for an inherited type', function() {
+				var inheritedNodeType = ntManager.getNodeType("inheritedNodeType");
+				expect(ntManager.getNodeType("ntWithOtherChildNode").canAddChildNode("inheritedNodeType", inheritedNodeType)).toBe(true);
+				expect(ntManager.getNodeType("ntWithOtherChildNode").canAddChildNode("inheritedNodeType", ntBase)).toBe(false);
+			});
+			it('for an undefined type', function() {
+				var otherNodeType = ntManager.getNodeType("otherNodeType");
+				expect(ntManager.getNodeType("ntWithUndefinedChildNode").canAddChildNode("otherNodeType", otherNodeType)).toBe(true);
+			});
+		});
+	});
+	
 	function sameArrayContent(array1, array2){
 		expect(array1.length).toBe(array2.length); 
 		for (var i=0; i<array2.length; i++){

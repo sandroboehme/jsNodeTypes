@@ -210,7 +210,6 @@ de.sandroboehme.NodeTypeManager = (function() {
 				return allCollectedChildNodeDefs;
 			};
 			
-			var that = this;
 			this.nodeTypesJson[name].getAllPropertyDefinitions = function(){
 				var allCollectedPropertyDefs = [];
 				var allCollectedPropertyDefNames = [];
@@ -227,6 +226,36 @@ de.sandroboehme.NodeTypeManager = (function() {
 					}
 				}); 
 				return allCollectedPropertyDefs;
+			};
+
+			this.nodeTypesJson[name].canAddChildNode = function(nodeName, nodeTypeToAdd){
+				var allChildNodeDefs = this.getAllChildNodeDefinitions();
+				var canAddChildNode = canAddByChildNodeName(allChildNodeDefs);
+				canAddChildNode = canAddChildNode && canAddNodeType(allChildNodeDefs, nodeTypeToAdd);
+				return canAddChildNode;
+				
+				function canAddByChildNodeName(allChildNodeDefs){
+					var canAddChildNode;
+					for (var childNodeDefIndex in allChildNodeDefs){
+						var childNodeDef = allChildNodeDefs[childNodeDefIndex];
+						canAddChildNode = canAddChildNode || ((childNodeDef.name === nodeName || "*" === childNodeDef.name) && childNodeDef.protected===false);
+					}
+					return canAddChildNode;
+				}
+				function canAddNodeType(allChildNodeDefs, nodeTypeToAdd){
+					var canAddNodeType;
+			        for(var i=0; i<allChildNodeDefs.length && !canAddNodeType; i++){
+						var childNodeDef = allChildNodeDefs[i];
+						processParentNodeTypes.call(that, nodeTypeToAdd, function(currentNodeType){
+							var requiredPrimaryTypes = childNodeDef.requiredPrimaryTypes;
+					        for(var requiredPrimaryTypeIndex=0; requiredPrimaryTypeIndex<requiredPrimaryTypes.length && !canAddNodeType; requiredPrimaryTypeIndex++){
+								var requiredPrimaryType = requiredPrimaryTypes[requiredPrimaryTypeIndex];
+								canAddNodeType = canAddNodeType || (requiredPrimaryType === currentNodeType.name || "undefined" === requiredPrimaryType);
+							}
+						});
+					} 
+					return canAddNodeType;
+				}
 			};
 		};
 		setDefaults.call(this, this.nodeTypesJson[name]);
