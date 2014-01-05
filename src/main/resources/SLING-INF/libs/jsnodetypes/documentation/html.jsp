@@ -67,6 +67,10 @@ input {
 .doc {
 	margin-bottom: 15px;
 }
+.parameter {
+	margin-left: 40px;
+}
+
 </style>
 
 <script type="text/javascript">
@@ -99,16 +103,25 @@ function loadChildNodeDefs(){
 	var ntJson = getNTJson();
 	if (ntJson != null){
 		var allChildNodeDefs = ntJson.getAllChildNodeDefinitions();
-		document.getElementById("ntChildrenJson").innerHTML=JSON.stringify(allChildNodeDefs, null, 4);
+		document.getElementById("ntMethodResult").innerHTML=JSON.stringify(allChildNodeDefs, null, 4);
 	}
 };
 function loadPropertyDefs(){
 	var ntJson = getNTJson();
 	if (ntJson != null){
 		var propertyDefs = ntJson.getAllPropertyDefinitions();
-		document.getElementById("ntChildrenJson").innerHTML=JSON.stringify(propertyDefs, null, 4);
+		document.getElementById("ntMethodResult").innerHTML=JSON.stringify(propertyDefs, null, 4);
 	}
 };
+function canAddChildNode(){
+	var ntJson = getNTJson();
+	if (ntJson != null){
+		var nodeName = document.getElementById("nodeName").value;
+		var nodeTypeToAdd = document.getElementById("nodeTypeToAdd").value;
+		var canAddChildNode = ntJson.canAddChildNode(nodeName, ntManager.getNodeType(nodeTypeToAdd));
+		document.getElementById("ntMethodResult").innerHTML=canAddChildNode;
+	}
+}
 </script>
 
 </head>
@@ -119,28 +132,33 @@ function loadPropertyDefs(){
 		<h2>Live Demo of the API</h2>
 		<p>Have a look at the simple source code of this page to see how it's done.</p>
 		<div>
-			<input id="ntNamesButton" type="button" value="getNodeTypeNames()" onclick="getNTNames();"/>
+			<input id="ntNamesButton" type="button" value="ntManager.getNodeTypeNames();" onclick="getNTNames();"/>
 		</div>
 		<div class="block-code code">
 			<pre id="ntNames">[]</pre>
 		</div>
 		
 		<div>
-			<input id="ntButton" type="button" value="getNodeType" onclick="loadNTJson();"/>
-			(<input id="ntName" type="text" value="nt:version"/>)
+			<input id="ntButton" type="button" value="ntManager.getNodeType" onclick="loadNTJson();"/>
+			(<input id="ntName" type="text" value="nt:version"/>);
 		</div>
 		<div>
 			<div class="code">
 				<pre id="ntJson">{}</pre>
 			</div>
 			<dl class="nodeTypeMethods">
-		    	<dt><input type="button" value="getAllChildNodeDefinitions()" onclick="loadChildNodeDefs();"/></dt>
+		    	<dt><input type="button" value="getAllChildNodeDefinitions();" onclick="loadChildNodeDefs();"/></dt>
 				<dd class="doc">That method returns the <strong>child node definitions</strong> of the node type and those <strong>of all inherited node types</strong>.</dd>
-				<dt><input type="button" value="getAllPropertyDefinitions()" onclick="loadPropertyDefs();"/></dt>
+				<dt><input type="button" value="getAllPropertyDefinitions();" onclick="loadPropertyDefs();"/></dt>
 				<dd class="doc">That method returns the <strong>property definitions</strong> of the node type and those <strong>of all inherited node types</strong>.<br/></dd>
+				<dt><input type="button" value="canAddChildNode" onclick="canAddChildNode();"/>
+						(<input type="text" value="nodeName" id="nodeName" class="parameter"/>,
+						<span style="display:inline-block" class="parameter">ntManager.getNodeType(<input type="select" value="nodeTypeToAdd" id="nodeTypeToAdd" class="parameter"/>)</span>);
+				</dt>
+				<dd class="doc">That method returns `true` if a node with the specified node name and node type can be added as a child node of the current node type. The `undefined` requiredTypes and residual definitions are considered.<br/>The <strong>first parameter is the string</strong> of the node name and the <strong>second parameter is a node type object</strong> (not a string).</dd>
 			</dl>
 			<div class="code">
-				<pre id="ntChildrenJson">{}</pre>
+				<pre id="ntMethodResult">{}</pre>
 			</div>
 		</div>
 		<h2>License</h2>

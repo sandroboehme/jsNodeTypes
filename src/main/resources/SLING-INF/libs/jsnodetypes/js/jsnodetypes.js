@@ -235,7 +235,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 				return canAddChildNode;
 				
 				function canAddByChildNodeName(allChildNodeDefs){
-					var canAddChildNode;
+					var canAddChildNode=false;
 					for (var childNodeDefIndex in allChildNodeDefs){
 						var childNodeDef = allChildNodeDefs[childNodeDefIndex];
 						canAddChildNode = canAddChildNode || ((childNodeDef.name === nodeName || "*" === childNodeDef.name) && childNodeDef.protected===false);
@@ -247,6 +247,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 			        for(var i=0; i<allChildNodeDefs.length && !canAddNodeType; i++){
 						var childNodeDef = allChildNodeDefs[i];
 						processParentNodeTypes.call(that, nodeTypeToAdd, function(currentNodeType){
+							// currentNodeType is the specified node type or one of its super types
 							var requiredPrimaryTypes = childNodeDef.requiredPrimaryTypes;
 					        for(var requiredPrimaryTypeIndex=0; requiredPrimaryTypeIndex<requiredPrimaryTypes.length && !canAddNodeType; requiredPrimaryTypeIndex++){
 								var requiredPrimaryType = requiredPrimaryTypes[requiredPrimaryTypeIndex];

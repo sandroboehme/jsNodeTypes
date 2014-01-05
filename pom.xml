@@ -114,13 +114,13 @@
 					<execution>
 						<id>install-bundle</id>
 						<goals>
-							<goal>validate</goal>
-<!-- 							<goal>install</goal> -->
+<!-- 							<goal>validate</goal> -->
+							<goal>install</goal>
 <!-- 							<goal>deploy</goal> -->
 						</goals>
 						<configuration>
 							<mountByFS>true</mountByFS>
-							<slingUrl>http://localhost:8080/sling6/system/console</slingUrl>
+							<slingUrl>http://localhost:8080/system/console</slingUrl>
 							<user>admin</user>
 							<password>admin</password>
 						</configuration>
