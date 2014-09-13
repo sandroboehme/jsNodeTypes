@@ -115,7 +115,7 @@
 						<id>install-bundle</id>
 						<goals>
 <!-- 							<goal>validate</goal> -->
-							<goal>install</goal>
+<!-- 							<goal>install</goal> -->
 <!-- 							<goal>deploy</goal> -->
 						</goals>
 						<configuration>
