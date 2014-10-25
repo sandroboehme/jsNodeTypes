@@ -421,6 +421,114 @@ describe('The Node Type Manager', function() {
 		});			
 	});
 
+	describe('returns in getValidChildNodeTypes()', function () {
+		var settings = {
+				"defaultNTJsonURL": defaultNTJsonURL,
+				"nodeTypesJson" : {
+					"nt:base" : {
+					},
+					"aSuperType" : {
+					    "declaredChildNodeDefinitions": [
+					     {
+					    	 "requiredPrimaryTypes": [
+					    	     "superTypeChildNodeDefinition1"
+					    	 ],
+					      	 "name" : "superTypeChildNodeDefinition1Name"
+					      },
+					      {
+						     "requiredPrimaryTypes": [
+						         "superTypeChildNodeDefinition2"
+						     ],
+						     "name" : "superTypeChildNodeDefinition2Name"
+						  }
+					    ]
+					},
+					"superTypeChildNodeDefinition1" : {
+					    "declaredSupertypes": [
+					        "superTypeChildNodeDefinition1SuperType"
+					  	]
+					},
+					"superTypeChildNodeDefinition2" : {
+					    "declaredSupertypes": [
+					  		"superTypeChildNodeDefinition2SuperType"
+					  	]
+					},
+					"superTypeChildNodeDefinition1SuperType" : {
+					    "declaredSupertypes": [
+					  		"superTypeChildNodeDefinition1SuperSuperType"
+					  	]
+					},
+					"superTypeChildNodeDefinition2SuperType" : {
+					    "declaredSupertypes": [
+					  		"superTypeChildNodeDefinition2SuperSuperType"
+					  	]
+					},
+					"superTypeChildNodeDefinition1SuperSuperType" : {
+					},
+					"superTypeChildNodeDefinition2SuperSuperType" : {
+					},
+					"aNodeType" : {
+					    "declaredSupertypes": [
+					        "aSuperType"
+ 					    ],
+ 					    "declaredChildNodeDefinitions": [
+					     {
+					    	 "requiredPrimaryTypes": [
+					    	     "childNodeDefinition1"
+					    	 ],
+					      	 "name" : "childNodeDefinition1Name"
+					      },
+					      {
+						     "requiredPrimaryTypes": [
+						          "childNodeDefinition2"
+						     ],
+						     "name" : "childNodeDefinition2Name"
+						  }
+					    ]
+					},
+					"childNodeDefinition1" : {
+					    "declaredSupertypes": [
+					        "childNodeDefinition1SuperType"
+					  	]
+					},
+					"childNodeDefinition2" : {
+					    "declaredSupertypes": [
+					  		"childNodeDefinition2SuperType"
+					  	]
+					},
+					"childNodeDefinition1SuperType" : {
+					},
+					"childNodeDefinition2SuperType" : {
+					}
+			}
+		};
+
+		var ntManager = new de.sandroboehme.NodeTypeManager(settings);
+		var ntBase = ntManager.getNodeType("nt:base");
+		var ntResidualChild = ntManager.getNodeType("ntResidualChild");
+		
+		it('all valid child node types ', function() {
+			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("childNodeDefinition1");
+			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("childNodeDefinition2");
+		});
+		it('all valid child node types\' super types ', function() {
+			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("childNodeDefinition1SuperType");
+			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("childNodeDefinition2SuperType");
+		});
+		it('all valid super types child node types', function() {
+			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("superTypeChildNodeDefinition1");
+			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("superTypeChildNodeDefinition2");
+		});
+		it('all valid super types child node types\' super types', function() {
+			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("superTypeChildNodeDefinition1SuperType");
+			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("superTypeChildNodeDefinition2SuperType");
+		});
+		it('all valid super types child node types\' super super types', function() {
+			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("superTypeChildNodeDefinition1SuperSuperType");
+			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("superTypeChildNodeDefinition2SuperSuperType");
+		});
+	});
+
 	describe('checks in canAddChildNode()', function () {
 
 		var settings = {
