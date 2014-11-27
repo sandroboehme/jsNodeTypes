@@ -36,7 +36,8 @@ de.sandroboehme.NodeTypeManager = (function() {
 		var contextPath = (noSettingsProvided || typeof settingsParameter.contextPath === 'undefined') ? '' : settingsParameter.contextPath;
 		var defaultNTJsonURL = (noSettingsProvided || typeof settingsParameter.defaultNTJsonURL === 'undefined') ? contextPath+'/libs/jsnodetypes/js/defaultNT/defaultNT.json' : settingsParameter.defaultNTJsonURL;
 		this.defaultNTJson = getJson(defaultNTJsonURL);
-		this.nodeTypesJson = (noSettingsProvided || typeof settingsParameter.nodeTypesJson === 'undefined') ? getJson(contextPath+'/libs/jsnodetypes/content/nodetypes.json') : settingsParameter.nodeTypesJson; 
+		this.nodeTypesJson = (noSettingsProvided || typeof settingsParameter.nodeTypesJson === 'undefined') ? getJson(contextPath+'/libs/jsnodetypes/content/nodetypes.json') : settingsParameter.nodeTypesJson;
+		addSubtypeRelation.call(this, this.nodeTypesJson);
 	};
 	
 	function getJson(url){
@@ -63,7 +64,26 @@ de.sandroboehme.NodeTypeManager = (function() {
 		xhr.send(null);
 		return result;
 	}
+
+	/*
+	 * Navigates to every node types' supertype and sets the subtype property there.
+	 */
+	function addSubtypeRelation(nodeTypesJson){
+		for (var nodeTypeName in nodeTypesJson) {
+			nodeTypeJson = nodeTypesJson[nodeTypeName];
+			for (var supertypeIndex in nodeTypeJson.declaredSupertypes) {
+				var supertypeName = nodeTypeJson.declaredSupertypes[supertypeIndex];
+				var supertype = this.getNodeType(supertypeName);
+				if (typeof supertype.subtypes === "undefined") {
+					supertype.subtypes = [];
+				}
+				supertype.subtypes.push(nodeTypeName);
+			}
+		}
+		return nodeTypesJson;
+	}
 	
+	/* adding an indexOf function if it's not available */
 	if (!Array.prototype.indexOf) {
 	    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
 	        "use strict";
@@ -98,13 +118,14 @@ de.sandroboehme.NodeTypeManager = (function() {
 	}
 
 	/*
-	 * This function walks recursively through all parent node types and calls the proccessing function with the current node type
+	 * This function walks recursively through all parent node types and calls the processing function with the current node type
 	 *  
 	 * currentNodeType - the node type to retrieve the property defs from in this call 
 	 * processingFunction - the function to call on every node type
 	 * processedNodeTypes - is used to avoid cycles by checking if a node type has been processed already
+	 * iterationProperty - the property of the nodeType that should be used for iteration e.g. 'declaredSupertypes'
 	 */
-	function processParentNodeTypes (currentNodeType, processingFunction, processedNodeTypes){
+	function processNodeTypeGraph (currentNodeType, iterationProperty, processingFunction, processedNodeTypes){
 		var initialCall = typeof processedNodeTypes === 'undefined';
 		if (initialCall){
 			processedNodeTypes = [];
@@ -114,14 +135,14 @@ de.sandroboehme.NodeTypeManager = (function() {
 
 		processedNodeTypes.push(currentNodeType.name);
 		
-		for (var supertypeIndex in currentNodeType.declaredSupertypes) {
-			newNodeTypeName = currentNodeType.declaredSupertypes[supertypeIndex];
+		for (var supertypeIndex in currentNodeType[iterationProperty]) {
+			newNodeTypeName = currentNodeType[iterationProperty][supertypeIndex];
 			
 			newNodeType = this.getNodeType(newNodeTypeName);
 			
 			var notProcessedYet = processedNodeTypes.indexOf(newNodeTypeName) < 0;
 			if (notProcessedYet){
-				processParentNodeTypes.call(this, newNodeType, processingFunction, processedNodeTypes);
+				processNodeTypeGraph.call(this, newNodeType, iterationProperty, processingFunction, processedNodeTypes);
 			}
 		}
 	};
@@ -189,13 +210,17 @@ de.sandroboehme.NodeTypeManager = (function() {
 		if (typeof this.nodeTypesJson[name] === "undefined") {
 			return null;
 		};
+		// lazy initialization of the node type
 		if (typeof this.nodeTypesJson[name].name === "undefined") {
 			this.nodeTypesJson[name].name = name;
 			var that = this;
+			/*
+			 * Returns the child node definitions of the node type and those of all inherited node types.
+			 */
 			this.nodeTypesJson[name].getAllChildNodeDefinitions = function(){
 				var allCollectedChildNodeDefs = [];
 				var allCollectedChildNodeDefNames = [];
-				processParentNodeTypes.call(that, that.nodeTypesJson[name], function(currentNodeType){
+				processNodeTypeGraph.call(that, that.nodeTypesJson[name], 'declaredSupertypes', function(currentNodeType){
 					for (var childNodeDefIndex in currentNodeType.declaredChildNodeDefinitions) {
 						var childNodeDef = currentNodeType.declaredChildNodeDefinitions[childNodeDefIndex];
 						var childNodeDefName = childNodeDef.name;
@@ -209,11 +234,13 @@ de.sandroboehme.NodeTypeManager = (function() {
 				}); 
 				return allCollectedChildNodeDefs;
 			};
-			
+			/*
+			 * Returns the property definitions of the node type and those of all inherited node types.
+			 */
 			this.nodeTypesJson[name].getAllPropertyDefinitions = function(){
 				var allCollectedPropertyDefs = [];
 				var allCollectedPropertyDefNames = [];
-				processParentNodeTypes.call(that, that.nodeTypesJson[name], function(currentNodeType){
+				processNodeTypeGraph.call(that, that.nodeTypesJson[name], 'declaredSupertypes', function(currentNodeType){
 					for (var propertyDefIndex in currentNodeType.declaredPropertyDefinitions) {
 						var propertyDef = currentNodeType.declaredPropertyDefinitions[propertyDefIndex];
 						var propertyDefName = propertyDef.name;
@@ -228,6 +255,13 @@ de.sandroboehme.NodeTypeManager = (function() {
 				return allCollectedPropertyDefs;
 			};
 
+			/*
+			 * Returns `true` if a node with the specified node name and node type can be added as a child node of the current node type. 
+			 * The `undefined` requiredTypes and residual definitions are considered.
+			 * 
+			 * The first parameter is the string of the node name and 
+			 * the second parameter is a node type object (not a string).
+			 */
 			this.nodeTypesJson[name].canAddChildNode = function(nodeName, nodeTypeToAdd){
 				var allChildNodeDefs = this.getAllChildNodeDefinitions();
 				var canAddChildNode = canAddByChildNodeName(allChildNodeDefs);
@@ -246,7 +280,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 					var canAddNodeType;
 			        for(var i=0; i<allChildNodeDefs.length && !canAddNodeType; i++){
 						var childNodeDef = allChildNodeDefs[i];
-						processParentNodeTypes.call(that, nodeTypeToAdd, function(currentNodeType){
+						processNodeTypeGraph.call(that, nodeTypeToAdd, 'declaredSupertypes', function(currentNodeType){
 							// currentNodeType is the specified node type or one of its super types
 							var requiredPrimaryTypes = childNodeDef.requiredPrimaryTypes;
 					        for(var requiredPrimaryTypeIndex=0; requiredPrimaryTypeIndex<requiredPrimaryTypes.length && !canAddNodeType; requiredPrimaryTypeIndex++){
@@ -258,6 +292,38 @@ de.sandroboehme.NodeTypeManager = (function() {
 					return canAddNodeType;
 				}
 			};
+
+			/*
+			 * Returns all node types that can be used for child nodes of this node type and its super types.
+			 */
+			this.nodeTypesJson[name].getApplicableChildNodeTypesByNodename = function(){
+				var applChildNodeTypes = {};
+				
+				function generateApplicableChildNodeTypes(nodeType, childNodeName, applChildNodeTypes){
+					processNodeTypeGraph.call(that, nodeType, 'subtypes', function(currentNodeType){
+						if (currentNodeType != null) {
+							addTypeByItemname(applChildNodeTypes, childNodeName, currentNodeType.name);
+							for (var subtypeIndex in currentNodeType.subtypes) {
+								var subtypeName = currentNodeType.subtypes[subtypeIndex];
+								addTypeByItemname(applChildNodeTypes, childNodeName, subtypeName);
+							}
+						}
+						
+					}); 
+				}
+				var cnDefs = that.nodeTypesJson[name].getAllChildNodeDefinitions();
+				for (var cnDefIndex in cnDefs) {
+					var cnDef = cnDefs[cnDefIndex];
+					var childNodeTypes = cnDef.requiredPrimaryTypes;
+					for (var childNodeTypeIndex in childNodeTypes) {
+						var childNodeTypeName = childNodeTypes[childNodeTypeIndex];
+						var childNodeType = that.getNodeType(childNodeTypeName);
+						generateApplicableChildNodeTypes(childNodeType, cnDef.name, applChildNodeTypes);
+					}
+					
+				}
+				return applChildNodeTypes;
+			}
 		};
 		setDefaults.call(this, this.nodeTypesJson[name]);
 		return this.nodeTypesJson[name];

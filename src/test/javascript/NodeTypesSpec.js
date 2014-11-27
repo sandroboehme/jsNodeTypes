@@ -431,41 +431,60 @@ describe('The Node Type Manager', function() {
 					    "declaredChildNodeDefinitions": [
 					     {
 					    	 "requiredPrimaryTypes": [
-					    	     "superTypeChildNodeDefinition1"
+					    	     "supCnDef1"
 					    	 ],
-					      	 "name" : "superTypeChildNodeDefinition1Name"
+					      	 "name" : "supCnDef1Name"
 					      },
 					      {
 						     "requiredPrimaryTypes": [
-						         "superTypeChildNodeDefinition2"
+	  					  		"supCnDef3",
+						  		"supCnDef2"
 						     ],
-						     "name" : "superTypeChildNodeDefinition2Name"
+						     "name" : "*"
 						  }
 					    ]
 					},
-					"superTypeChildNodeDefinition1" : {
+					"mix:supSupCnDef1" : {
+					    "mixin": true
+					},
+					"mix:supSupCnDef2" : {
+					    "mixin": true
+					},
+					"supCnDef1" : {
 					    "declaredSupertypes": [
-					        "superTypeChildNodeDefinition1SuperType"
+					  		"mix:supSupCnDef1",
+					  		"mix:supSupCnDef2"
 					  	]
 					},
-					"superTypeChildNodeDefinition2" : {
+					"supCnDef1Sub1" : {
 					    "declaredSupertypes": [
-					  		"superTypeChildNodeDefinition2SuperType"
+					  		"supCnDef1"
 					  	]
 					},
-					"superTypeChildNodeDefinition1SuperType" : {
+					"supCnDef1Sub11" : {
 					    "declaredSupertypes": [
-					  		"superTypeChildNodeDefinition1SuperSuperType"
+					  		"supCnDef1Sub1"
 					  	]
 					},
-					"superTypeChildNodeDefinition2SuperType" : {
+					"supCnDef2": {
+					},
+					"supCnDef2Sub1" : {
 					    "declaredSupertypes": [
-					  		"superTypeChildNodeDefinition2SuperSuperType"
+					  		"supCnDef2"
 					  	]
 					},
-					"superTypeChildNodeDefinition1SuperSuperType" : {
+					"supCnDef2Sub11" : {
+					    "declaredSupertypes": [
+					  		"supCnDef2Sub1"
+					  	]
 					},
-					"superTypeChildNodeDefinition2SuperSuperType" : {
+					"supCnDef3": {
+					},
+					"supCnDef3Def2" : {
+					    "declaredSupertypes": [
+					  		"supCnDef3",
+					  		"supCnDef2"
+					  	]
 					},
 					"aNodeType" : {
 					    "declaredSupertypes": [
@@ -474,58 +493,121 @@ describe('The Node Type Manager', function() {
  					    "declaredChildNodeDefinitions": [
 					     {
 					    	 "requiredPrimaryTypes": [
-					    	     "childNodeDefinition1"
+					    	     "cnDef1"
 					    	 ],
-					      	 "name" : "childNodeDefinition1Name"
+					      	 "name" : "cnDef1Name"
 					      },
 					      {
 						     "requiredPrimaryTypes": [
-						          "childNodeDefinition2"
+						          "cnDef2"
 						     ],
-						     "name" : "childNodeDefinition2Name"
-						  }
+						     "name" : "cnDef2Name"
+					      },
+					      {
+						     "requiredPrimaryTypes": [
+						          "cnDef3"
+						     ],
+						     "name" : "*"
+							  
+					      },
+					      {
+						     "requiredPrimaryTypes": [
+						          "cnDef4",
+						          "cnDef5"
+						     ],
+						     "name" : "*"
+					      }
 					    ]
 					},
-					"childNodeDefinition1" : {
+					"cnDef1" : {
+					},
+					"cnDef2" : {
+					},
+					"cnDef2Sub1" : {
 					    "declaredSupertypes": [
-					        "childNodeDefinition1SuperType"
+					        "cnDef2"
 					  	]
 					},
-					"childNodeDefinition2" : {
+					"cnDef2Sub11" : {
 					    "declaredSupertypes": [
-					  		"childNodeDefinition2SuperType"
+					        "cnDef2Sub1"
 					  	]
 					},
-					"childNodeDefinition1SuperType" : {
+					"cnDef2Sub2" : {
+					    "declaredSupertypes": [
+					        "cnDef2"
+					  	]
 					},
-					"childNodeDefinition2SuperType" : {
+					"cnDef3" : {
+					},
+					"cnDef4" : {
+					},
+					"cnDef5" : {
+					    "declaredSupertypes": [
+					  		"cnDef2Sub2"
+					  	]
+					},
+					"cnDef4Sub1" : {
+					    "declaredSupertypes": [
+					  		"cnDef4"
+					  	]
+					},
+					"cnDef4Sub11" : {
+					    "declaredSupertypes": [
+					  		"cnDef4Sub1"
+					  	]
+					},
+					"cnDef4Sub2" : {
+					    "declaredSupertypes": [
+					  		"cnDef4"
+					  	]
+					},
+					"cnDef5Sub1" : {
+					    "declaredSupertypes": [
+					  		"cnDef5"
+					  	]
+					},
+					"cnDef5Sub2" : {
+					    "declaredSupertypes": [
+					  		"cnDef5",
+					  		"cnDef2Sub2"
+					  	]
+					},
+					"cnDef45" : {
+					    "declaredSupertypes": [
+					  		"cnDef4Sub11",
+					  		"cnDef5Sub2"
+					  	]
+					},
+					"cnDef45Sub1" : {
+					    "declaredSupertypes": [
+					  		"cnDef45"
+					  	]
 					}
-			}
+				}
 		};
 
 		var ntManager = new de.sandroboehme.NodeTypeManager(settings);
 		var ntBase = ntManager.getNodeType("nt:base");
 		var ntResidualChild = ntManager.getNodeType("ntResidualChild");
-		
+
+		var validChildNodeTypes = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypesByNodename();
 		it('all valid child node types ', function() {
-			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("childNodeDefinition1");
-			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("childNodeDefinition2");
+//			expect(validChildNodeTypes).toContain("cnDef1", "cnDef2", "cnDef3", "cnDef4", "cnDef5");
 		});
-		it('all valid child node types\' super types ', function() {
-			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("childNodeDefinition1SuperType");
-			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("childNodeDefinition2SuperType");
+		xit('all valid child node types and its subtypes', function() {
 		});
-		it('all valid super types child node types', function() {
-			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("superTypeChildNodeDefinition1");
-			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("superTypeChildNodeDefinition2");
+		xit('all valid child node types with multiple requiredPrimaryTypes', function() {
 		});
-		it('all valid super types child node types\' super types', function() {
-			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("superTypeChildNodeDefinition1SuperType");
-			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("superTypeChildNodeDefinition2SuperType");
+		xit('all valid child node types\' super types ', function() {
 		});
-		it('all valid super types child node types\' super super types', function() {
-			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("superTypeChildNodeDefinition1SuperSuperType");
-			expect(ntManager.getNodeType("aNodeType").getValidChildNodeTypes()).toContain("superTypeChildNodeDefinition2SuperSuperType");
+		xit('all valid super types\' child node types', function() {
+		});
+		xit('all valid super types\' child node types and its subtypes', function() {
+		});
+		xit('all valid super types\' child node types with multiple requiredPrimaryTypes', function() {
+		});
+		xit('all valid super types\' child node types with multiple requiredPrimaryTypes\' sub types', function() {
 		});
 	});
 
