@@ -707,25 +707,108 @@ describe('The Node Type Manager', function() {
 		var ntResidualChild = ntManager.getNodeType("ntResidualChild");
 
 		var applicableCnTypes = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypes();
-		it('all valid child node types and its subtypes', function() {
+
+		
+		/* adding an keySize function to Object */
+		if (typeof Object.keySize === "undefined") {
+			Object.keySize = function(obj) {
+			    var keySize = 0, key;
+			    for (key in obj) {
+			        if (obj.hasOwnProperty(key)) keySize++;
+			    }
+			    return keySize;
+			};
+		}
+		
+		it('all valid child node types', function() {
 			expect(applicableCnTypes!=null).toBe(true);
 			expect(applicableCnTypes).toBeDefined();
+			
 			expect(applicableCnTypes["cnDef1Name"]).toBeDefined();
+			expect(Object.keySize(applicableCnTypes["cnDef1Name"])).toBe(1);
+			expect(applicableCnTypes["cnDef1Name"]["cnDef1"]).toBeDefined();
+
 			expect(applicableCnTypes["cnDef2Name"]).toBeDefined();
+			expect(Object.keySize(applicableCnTypes["cnDef2Name"])).toBe(9);
+			expect(applicableCnTypes["cnDef2Name"]["cnDef2"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef2Sub1"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef2Sub11"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef2Sub2"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef5"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef5Sub1"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef5Sub2"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef45"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef45Sub1"]).toBeDefined();
+			
 			expect(applicableCnTypes["*"]).toBeDefined();
+			expect(Object.keySize(applicableCnTypes["*"])).toBe(15);
+			expect(applicableCnTypes["*"]["supCnDef2"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef2Sub1"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef2Sub11"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef3"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef3Def2"]).toBeDefined();
+			
+			expect(applicableCnTypes["*"]["cnDef3"]).toBeDefined();
+
+			expect(applicableCnTypes["*"]["cnDef4"]).toBeDefined();
+			//The following three node types contain a cycle within multiple required primary types that should ba handled correctly.
+			expect(applicableCnTypes["*"]["cnDef4Sub1"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef4Sub11"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef4Sub2"]).toBeDefined();
+			
+			// cnDef5Sub2, cnDef5 and cnDef2Sub2 contain a cycle. It spans over two child node definitions with the same name and
+			// should be handled correctly
+			expect(applicableCnTypes["*"]["cnDef5"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef5Sub1"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef5Sub2"]).toBeDefined();
+			
+			expect(applicableCnTypes["*"]["cnDef45"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef45Sub1"]).toBeDefined();
+
+			expect(applicableCnTypes["supCnDef1Name"]).toBeDefined();
+			expect(Object.keySize(applicableCnTypes["supCnDef1Name"])).toBe(3);
+			expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub1"]).toBeDefined();
+			expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub11"]).toBeDefined();
 		});
-		xit('all valid child node types with multiple requiredPrimaryTypes', function() {
+		
+		it('all valid child node types with multiple requiredPrimaryTypes', function() {
+			expect(applicableCnTypes["*"]["supCnDef2"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef2Sub1"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef2Sub11"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef3"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef3Def2"]).toBeDefined();
+			
+			expect(applicableCnTypes["*"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef4"]).toBeDefined();
+			//The following three node types contain a cycle within multiple required primary types that should ba handled correctly.
+			expect(applicableCnTypes["*"]["cnDef4Sub1"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef4Sub11"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef4Sub2"]).toBeDefined();
+			
+			// cnDef5Sub2, cnDef5 and cnDef2Sub2 contain a cycle. It spans over two child node definitions with the same name and
+			// should be handled correctly
+			expect(applicableCnTypes["*"]["cnDef5"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef5Sub1"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef5Sub2"]).toBeDefined();
+			
+			expect(applicableCnTypes["*"]["cnDef45"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef45Sub1"]).toBeDefined();
 		});
-		xit('all valid child node types\' super types ', function() {
+		
+		it('all valid super types\' child node types and its subtypes including multiple requiredPrimaryTypes', function() {
+			expect(applicableCnTypes["supCnDef1Name"]).toBeDefined();
+			expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub1"]).toBeDefined();
+			expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub1"]).toBeDefined();
+			expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub11"]).toBeDefined();
+			
+			expect(applicableCnTypes["*"]["supCnDef2"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef2Sub1"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef2Sub11"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef3"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef3Def2"]).toBeDefined();
+
 		});
-		xit('all valid super types\' child node types', function() {
-		});
-		xit('all valid super types\' child node types and its subtypes', function() {
-		});
-		xit('all valid super types\' child node types with multiple requiredPrimaryTypes', function() {
-		});
-		xit('all valid super types\' child node types with multiple requiredPrimaryTypes\' sub types', function() {
-		});
+
 	});
 
 	describe('checks in canAddChildNode()', function () {

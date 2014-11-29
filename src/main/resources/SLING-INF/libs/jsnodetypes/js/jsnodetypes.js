@@ -302,44 +302,6 @@ de.sandroboehme.NodeTypeManager = (function() {
 			this.nodeTypesJson[name].getApplicableChildNodeTypes = function(){
 				var applChildNodeTypes = {};
 
-				/*
-				 * Expects an object with an item name as a key and with 
-				 * an array of types as values as a first parameter.
-				 */
-				function addCnTypeByItemname(typesByItemname, itemName, type){
-					var itemNameNotYetProcessed = typeof typesByItemname[itemName] === "undefined";
-					if (itemNameNotYetProcessed){
-						var typeName = "";
-						typeName = type.name;
-						typesByItemname[itemName] = {};
-						for (var reqPrimaryTypeIndex in type.requiredPrimaryTypes){
-							typesByItemname[itemName][type.requiredPrimaryTypes[reqPrimaryTypeIndex]] = type;
-						}
-//						typesByItemname[itemName][type.name] = type;
-					} else {
-						var itemNameAndTypeNotYetProcessed = typeof typesByItemname[itemName][type.name] === "undefined";
-						if (itemNameAndTypeNotYetProcessed){
-							for (var reqPrimaryTypeIndex in type.requiredPrimaryTypes){
-								typesByItemname[itemName][type.requiredPrimaryTypes[reqPrimaryTypeIndex]] = type;
-							}
-//							typesByItemname[itemName][type.requiredPrimaryTypes[0]] = type;
-//							typesByItemname[itemName][type.name] = type;
-						}
-					}
-				}
-				
-				function generateApplicableChildNodeTypes(nodeType, childNodeName, applChildNodeTypes){
-					processNodeTypeGraph.call(that, nodeType, 'subtypes', function(currentNodeType){
-						if (currentNodeType != null) {
-							addCnTypeByItemname(applChildNodeTypes, childNodeName, currentNodeType.name);
-							for (var subtypeIndex in currentNodeType.subtypes) {
-								var subtypeName = currentNodeType.subtypes[subtypeIndex];
-								addCnTypeByItemname(applChildNodeTypes, childNodeName, subtypeName);
-							}
-						}
-						
-					}); 
-				}
 				var cnDefs = that.nodeTypesJson[name].getAllChildNodeDefinitions();
 				for (var cnDefIndex in cnDefs) {
 					var cnDef = cnDefs[cnDefIndex];
@@ -347,7 +309,17 @@ de.sandroboehme.NodeTypeManager = (function() {
 					for (var childNodeTypeIndex in childNodeTypes) {
 						var childNodeTypeName = childNodeTypes[childNodeTypeIndex];
 						var childNodeType = that.getNodeType(childNodeTypeName);
-						generateApplicableChildNodeTypes(childNodeType, cnDef.name, applChildNodeTypes);
+						
+						processNodeTypeGraph.call(that, childNodeType, 'subtypes', function(currentNodeType){
+							if (currentNodeType != null) {
+								var itemNameNotYetProcessed = typeof applChildNodeTypes[cnDef.name] === "undefined";
+								if (itemNameNotYetProcessed){
+									applChildNodeTypes[cnDef.name] = {};
+								} 
+								applChildNodeTypes[cnDef.name][currentNodeType.name] = that.getNodeType(currentNodeType.name);
+							}
+						}); 
+						
 					}
 					
 				}
