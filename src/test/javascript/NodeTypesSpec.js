@@ -73,29 +73,15 @@ describe('The Node Type Manager', function() {
 		//var ntManager = new de.sandroboehme.NodeTypeManager(settings);
 		var ntManager;
 
-		function createChildNodeDef(name){
-			var defaultNT = ntManager.internalGetDefaultNodeType();
-			var newChildNodeDef = {};
-			for (var childNodeDefPropName in defaultNT.declaredChildNodeDefinitions[0]) {
-				var childNodeDefPropValue = defaultNT.declaredChildNodeDefinitions[0][childNodeDefPropName];
-				newChildNodeDef[childNodeDefPropName] = childNodeDefPropValue;
-			}
-			newChildNodeDef.name = name;
-			return newChildNodeDef; 
-		};
-
-		function createPropertyDef(name){
-			var defaultNT = ntManager.internalGetDefaultNodeType();
-			var newPropDef = {};
-			for (var propNodeDefPropName in defaultNT.declaredPropertyDefinitions[0]) {
-				var propNodeDefPropValue = defaultNT.declaredPropertyDefinitions[0][propNodeDefPropName];
-				newPropDef[propNodeDefPropName] = propNodeDefPropValue;
-			}
-			newPropDef.name = name;
-			return newPropDef; 
-		};
-		
 		describe('all child node definitions from the super types ', function () {
+			
+			function arrayContainsCnDefWithName(array, cnDefName){
+				var found = false;
+				for (var i=0; i<array.length && found===false; i++){
+					found = array[i].name === cnDefName;
+				}
+				return found;
+			}
 			
 			it('with <getAllChildNodeDefinitions()>.', function() {
 				var settings = {
@@ -131,10 +117,16 @@ describe('The Node Type Manager', function() {
 						}} 
 				};
 				ntManager = new de.sandroboehme.NodeTypeManager(settings);
-				var expectedChildNodeDefs = [{ name : 'childNodeDef1' }, {name : 'childNodeDef2' }, { name : 'childNodeDef3' }, { name : 'childNodeDef4' }, { name : 'childNodeDef5' }, { name : 'childNodeDef6' }, { name : 'childNodeDef7' }, { name : 'childNodeDef8' }];
-				var expectedChildNodeDefs = [createChildNodeDef('childNodeDef1'),createChildNodeDef('childNodeDef2'), createChildNodeDef('childNodeDef3'), createChildNodeDef('childNodeDef4'), createChildNodeDef('childNodeDef5'), createChildNodeDef('childNodeDef6'), createChildNodeDef('childNodeDef7'), createChildNodeDef('childNodeDef8')];
 				var resultingChildNodeDefs = ntManager.getNodeType("aNodeType").getAllChildNodeDefinitions();
-				sameArrayContent(expectedChildNodeDefs, resultingChildNodeDefs);
+				expect(resultingChildNodeDefs.length).toBe(8);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef1")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef2")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef3")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef4")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef5")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef6")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef7")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef8")).toBe(true);
 			});
 			
 			it('with <getAllChildNodeDefinitions()> but does not contain duplicate entries from the parents.', function() {
@@ -158,10 +150,50 @@ describe('The Node Type Manager', function() {
 						}} 
 				};
 				ntManager = new de.sandroboehme.NodeTypeManager(settings);
-				var expectedChildNodeDefs = [ 'childNodeDef1', 'childNodeDef2'];
-				var expectedChildNodeDefs = [createChildNodeDef('childNodeDef1'), createChildNodeDef('childNodeDef2')];
 				var resultingChildNodeDefs = ntManager.getNodeType("aNodeType").getAllChildNodeDefinitions();
-				sameArrayContent(expectedChildNodeDefs, resultingChildNodeDefs);
+				expect(resultingChildNodeDefs.length).toBe(2);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef1")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef2")).toBe(true);
+			});
+			
+			it('with <getAllChildNodeDefinitions()> and lists child node definitions with the same name but different content.', function() {
+				var settings = {
+						"defaultNTJsonURL": defaultNTJsonURL,
+						"nodeTypesJson" : {"aNodeType" : {
+							"declaredSupertypes" : [ "aParentNodeType" ],
+							"declaredChildNodeDefinitions" : [{
+									"name" : "childNodeDef1",
+							        "requiredPrimaryTypes": [
+							            "aNodeType"
+		                            ],
+								},{
+									"name" : "childNodeDef2"
+								} 
+							]
+						},"aParentNodeType" : {
+							"declaredSupertypes" : [ "aGrandParentNodeType" ],
+							"declaredChildNodeDefinitions" : [{
+									"name" : "childNodeDef1"
+								},{
+									"name" : "childNodeDef2"
+								} 
+							]
+						},"aGrandParentNodeType" : {
+							"declaredChildNodeDefinitions" : [{
+									"name" : "childNodeDef1"
+								}
+							]
+						},"nt:base" : {
+							"declaredSupertypes" : []
+						}} 
+				};
+				ntManager = new de.sandroboehme.NodeTypeManager(settings);
+				var resultingChildNodeDefs = ntManager.getNodeType("aNodeType").getAllChildNodeDefinitions();
+				
+				expect(resultingChildNodeDefs.length).toBe(3);
+				
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef1")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef2")).toBe(true);
 			});
 			
 			it('with <getAllChildNodeDefinitions()> but does not follow circular dependencies.', function() {
@@ -193,15 +225,28 @@ describe('The Node Type Manager', function() {
 						}} 
 				};
 				ntManager = new de.sandroboehme.NodeTypeManager(settings);
-		
-				var expectedChildNodeDefs = [createChildNodeDef('childNodeDef1'), createChildNodeDef('childNodeDef2'), createChildNodeDef('childNodeDef3'), createChildNodeDef('childNodeDef4'), createChildNodeDef('childNodeDef5'), createChildNodeDef('childNodeDef6') ];
 	
 				var resultingChildNodeDefs = ntManager.getNodeType("aNodeType").getAllChildNodeDefinitions();
-				sameArrayContent(expectedChildNodeDefs, resultingChildNodeDefs);
+				expect(resultingChildNodeDefs.length).toBe(6);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef1")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef2")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef3")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef4")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef5")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef6")).toBe(true);
 			});
 		});
 	
 		describe('all property definitions from the super types', function () {
+			
+			function arrayContainsPropDefWithName(array, propDefName){
+				var found = false;
+				for (var i=0; i<array.length && found===false; i++){
+					found = array[i].name === propDefName;
+				}
+				return found;
+			}
+			
 			it('with <getAllPropertyDefinitions()>', function() {
 				var settings = {
 						"defaultNTJsonURL": defaultNTJsonURL,
@@ -236,9 +281,16 @@ describe('The Node Type Manager', function() {
 						}}
 				};
 				ntManager = new de.sandroboehme.NodeTypeManager(settings);
-				var expectedPropertyDefs = [createPropertyDef('propertyDef1'), createPropertyDef('propertyDef2'), createPropertyDef('propertyDef3'), createPropertyDef('propertyDef4'), createPropertyDef('propertyDef5'), createPropertyDef('propertyDef6'), createPropertyDef('propertyDef7'), createPropertyDef('propertyDef8') ];
 				var resultingPropertyDefs = ntManager.getNodeType("aNodeType").getAllPropertyDefinitions();
-				sameArrayContent(expectedPropertyDefs, resultingPropertyDefs);
+				expect(resultingPropertyDefs.length).toBe(8);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef1")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef2")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef3")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef4")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef5")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef6")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef7")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef8")).toBe(true);
 			});
 			
 			it('with <getAllPropertyDefinitions()> but does not contain duplicate entries from the parents.', function() {
@@ -269,9 +321,67 @@ describe('The Node Type Manager', function() {
 						}}
 				};
 				ntManager = new de.sandroboehme.NodeTypeManager(settings);
-				var expectedPropertyDefs = [createPropertyDef('propertyDef1'), createPropertyDef('propertyDef2') ];
 				var resultingPropertyDefs = ntManager.getNodeType("aNodeType").getAllPropertyDefinitions();
-				sameArrayContent(expectedPropertyDefs, resultingPropertyDefs);
+				expect(resultingPropertyDefs.length).toBe(2);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef1")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef2")).toBe(true);
+			});
+			
+			it('with <getAllPropertyDefinitions()>  and lists property definitions with the same name but different content.', function() {
+				var settings = {
+						"defaultNTJsonURL": defaultNTJsonURL,
+						"nodeTypesJson" : {"aNodeType" : {
+							"declaredSupertypes" : [ "aParentNodeType" ],
+							"declaredPropertyDefinitions" : [{
+								"name" : "propertyDef1",
+								"multiple": true
+								},{
+								"name" : "propertyDef2",
+								"multiple": true
+								} 
+							]
+						},"aParentNodeType" : {
+							"declaredSupertypes" : [ "aGrandParentNodeType" ],
+							"declaredPropertyDefinitions" : [{
+								"name" : "propertyDef1"
+								},{
+								"name" : "propertyDef2",
+								"multiple": true
+								} 
+							]
+						},"aGrandParentNodeType" : {
+							"declaredSupertypes" : [ "aGrandGrandParentNodeType" ],
+							"declaredPropertyDefinitions" : [{
+								"name" : "propertyDef1",
+						        "valueConstraints": [
+						          "nt:versionHistory"
+						        ],
+								},{
+								"name" : "propertyDef2",
+								"multiple": true
+								} 
+							]
+						},"aGrandGrandParentNodeType" : {
+							"declaredPropertyDefinitions" : [{
+								"name" : "propertyDef1",
+								"defaultValues": [{
+									"string": "nt:base",
+									"type": "Name"
+                                }],
+								},{
+								"name" : "propertyDef2",
+								"multiple": true
+								} 
+							]
+						},"nt:base" : {
+							"declaredSupertypes" : []
+						}}
+				};
+				ntManager = new de.sandroboehme.NodeTypeManager(settings);
+				var resultingPropertyDefs = ntManager.getNodeType("aNodeType").getAllPropertyDefinitions();
+				expect(resultingPropertyDefs.length).toBe(5);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef1")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef2")).toBe(true);
 			});
 			
 			it('with <getAllPropertyDefinitions()> but does not follow circular dependencies.', function() {
@@ -303,9 +413,14 @@ describe('The Node Type Manager', function() {
 						}}
 				};
 				ntManager = new de.sandroboehme.NodeTypeManager(settings);
-				var expectedPropertyDefs = [createPropertyDef('propertyDef1'), createPropertyDef('propertyDef2'), createPropertyDef('propertyDef3'), createPropertyDef('propertyDef4'), createPropertyDef('propertyDef5'), createPropertyDef('propertyDef6')];
 				var resultingPropertyDefs = ntManager.getNodeType("aNodeType").getAllPropertyDefinitions();
-				sameArrayContent(expectedPropertyDefs, resultingPropertyDefs);
+				expect(resultingPropertyDefs.length).toBe(6);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef1")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef2")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef3")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef4")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef5")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef6")).toBe(true);
 			});
 
 		});
@@ -421,7 +536,7 @@ describe('The Node Type Manager', function() {
 		});			
 	});
 
-	describe('returns in getValidChildNodeTypes()', function () {
+	describe('returns in getApplicableChildNodeTypes()', function () {
 		var settings = {
 				"defaultNTJsonURL": defaultNTJsonURL,
 				"nodeTypesJson" : {
@@ -591,11 +706,13 @@ describe('The Node Type Manager', function() {
 		var ntBase = ntManager.getNodeType("nt:base");
 		var ntResidualChild = ntManager.getNodeType("ntResidualChild");
 
-		var validChildNodeTypes = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypesByNodename();
-		it('all valid child node types ', function() {
-//			expect(validChildNodeTypes).toContain("cnDef1", "cnDef2", "cnDef3", "cnDef4", "cnDef5");
-		});
-		xit('all valid child node types and its subtypes', function() {
+		var applicableCnTypes = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypes();
+		it('all valid child node types and its subtypes', function() {
+			expect(applicableCnTypes!=null).toBe(true);
+			expect(applicableCnTypes).toBeDefined();
+			expect(applicableCnTypes["cnDef1Name"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]).toBeDefined();
+			expect(applicableCnTypes["*"]).toBeDefined();
 		});
 		xit('all valid child node types with multiple requiredPrimaryTypes', function() {
 		});
@@ -715,7 +832,9 @@ describe('The Node Type Manager', function() {
 	function sameArrayContent(array1, array2){
 		expect(array1.length).toBe(array2.length); 
 		for (var i=0; i<array2.length; i++){
-			expect(array1).toContain(array2[i]);
+			if (typeof array2[i] !== "undefined") {
+				expect(array1).toContain(array2[i]);
+			}
 		}
 	}
 

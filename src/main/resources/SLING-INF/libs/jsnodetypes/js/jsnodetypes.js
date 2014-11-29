@@ -214,20 +214,22 @@ de.sandroboehme.NodeTypeManager = (function() {
 		if (typeof this.nodeTypesJson[name].name === "undefined") {
 			this.nodeTypesJson[name].name = name;
 			var that = this;
+
 			/*
 			 * Returns the child node definitions of the node type and those of all inherited node types.
 			 */
 			this.nodeTypesJson[name].getAllChildNodeDefinitions = function(){
 				var allCollectedChildNodeDefs = [];
-				var allCollectedChildNodeDefNames = [];
+				var allCollectedChildNodeDefHashes = [];
 				processNodeTypeGraph.call(that, that.nodeTypesJson[name], 'declaredSupertypes', function(currentNodeType){
 					for (var childNodeDefIndex in currentNodeType.declaredChildNodeDefinitions) {
 						var childNodeDef = currentNodeType.declaredChildNodeDefinitions[childNodeDefIndex];
 						var childNodeDefName = childNodeDef.name;
+						var hashCode = childNodeDef.hashCode();
 						// in case the child has the same child node definition as its parent (supertype)
-						var notProcessedYet = allCollectedChildNodeDefNames.indexOf(childNodeDefName) < 0;
-						if (notProcessedYet){
-							allCollectedChildNodeDefNames.push(childNodeDefName);
+						var processed = allCollectedChildNodeDefHashes.indexOf(hashCode) >= 0;
+						if (!processed){
+							allCollectedChildNodeDefHashes.push(hashCode);
 							allCollectedChildNodeDefs.push(childNodeDef);
 						}
 					}
@@ -239,15 +241,16 @@ de.sandroboehme.NodeTypeManager = (function() {
 			 */
 			this.nodeTypesJson[name].getAllPropertyDefinitions = function(){
 				var allCollectedPropertyDefs = [];
-				var allCollectedPropertyDefNames = [];
+				var allCollectedPropertyDefHashes = [];
 				processNodeTypeGraph.call(that, that.nodeTypesJson[name], 'declaredSupertypes', function(currentNodeType){
 					for (var propertyDefIndex in currentNodeType.declaredPropertyDefinitions) {
 						var propertyDef = currentNodeType.declaredPropertyDefinitions[propertyDefIndex];
 						var propertyDefName = propertyDef.name;
+						var hashCode = propertyDef.hashCode();
 						// in case the child has the same property definition as its parent (supertype)
-						var notProcessedYet = allCollectedPropertyDefNames.indexOf(propertyDefName) < 0;
-						if (notProcessedYet){
-							allCollectedPropertyDefNames.push(propertyDefName);
+						var processed = allCollectedPropertyDefHashes.indexOf(hashCode) >= 0;
+						if (!processed){
+							allCollectedPropertyDefHashes.push(hashCode);
 							allCollectedPropertyDefs.push(propertyDef);
 						}
 					}
@@ -296,16 +299,42 @@ de.sandroboehme.NodeTypeManager = (function() {
 			/*
 			 * Returns all node types that can be used for child nodes of this node type and its super types.
 			 */
-			this.nodeTypesJson[name].getApplicableChildNodeTypesByNodename = function(){
+			this.nodeTypesJson[name].getApplicableChildNodeTypes = function(){
 				var applChildNodeTypes = {};
+
+				/*
+				 * Expects an object with an item name as a key and with 
+				 * an array of types as values as a first parameter.
+				 */
+				function addCnTypeByItemname(typesByItemname, itemName, type){
+					var itemNameNotYetProcessed = typeof typesByItemname[itemName] === "undefined";
+					if (itemNameNotYetProcessed){
+						var typeName = "";
+						typeName = type.name;
+						typesByItemname[itemName] = {};
+						for (var reqPrimaryTypeIndex in type.requiredPrimaryTypes){
+							typesByItemname[itemName][type.requiredPrimaryTypes[reqPrimaryTypeIndex]] = type;
+						}
+//						typesByItemname[itemName][type.name] = type;
+					} else {
+						var itemNameAndTypeNotYetProcessed = typeof typesByItemname[itemName][type.name] === "undefined";
+						if (itemNameAndTypeNotYetProcessed){
+							for (var reqPrimaryTypeIndex in type.requiredPrimaryTypes){
+								typesByItemname[itemName][type.requiredPrimaryTypes[reqPrimaryTypeIndex]] = type;
+							}
+//							typesByItemname[itemName][type.requiredPrimaryTypes[0]] = type;
+//							typesByItemname[itemName][type.name] = type;
+						}
+					}
+				}
 				
 				function generateApplicableChildNodeTypes(nodeType, childNodeName, applChildNodeTypes){
 					processNodeTypeGraph.call(that, nodeType, 'subtypes', function(currentNodeType){
 						if (currentNodeType != null) {
-							addTypeByItemname(applChildNodeTypes, childNodeName, currentNodeType.name);
+							addCnTypeByItemname(applChildNodeTypes, childNodeName, currentNodeType.name);
 							for (var subtypeIndex in currentNodeType.subtypes) {
 								var subtypeName = currentNodeType.subtypes[subtypeIndex];
-								addTypeByItemname(applChildNodeTypes, childNodeName, subtypeName);
+								addCnTypeByItemname(applChildNodeTypes, childNodeName, subtypeName);
 							}
 						}
 						
@@ -325,7 +354,56 @@ de.sandroboehme.NodeTypeManager = (function() {
 				return applChildNodeTypes;
 			}
 		};
+		
+		function itemHashCode(item){
+			var hash = "";
+			hash += item.name;
+			hash += item.autoCreated;
+			hash += item.mandatory;
+			hash += item.protected;
+			hash += item.onParentVersion;
+			return hash;
+		}
+
+		function initializeChildNodeDefs(){
+			for (var childNodeDefIndex in this.nodeTypesJson[name].declaredChildNodeDefinitions) {
+				var childNodeDef = this.nodeTypesJson[name].declaredChildNodeDefinitions[childNodeDefIndex];
+				
+				childNodeDef.hashCode = function (){
+					var hashCode = itemHashCode(this);
+					hashCode += this.allowsSameNameSiblings;
+					hashCode += this.defaultPrimaryType;
+					for (var reqPtIndex in this.requiredPrimaryTypes) {
+						hashCode += this.requiredPrimaryTypes[reqPtIndex];
+					}
+					return hashCode;
+				}
+			}
+		}
+
+		function initializePropertyDefs(){
+			for (var propertyIndex in this.nodeTypesJson[name].declaredPropertyDefinitions) {
+				var propertyDef = this.nodeTypesJson[name].declaredPropertyDefinitions[propertyIndex];
+				
+				propertyDef.hashCode = function (){
+					var hashCode = itemHashCode(this);
+					for (var defaultValueIndex in this.defaultValues) {
+						hashCode += this.defaultValues[defaultValueIndex];
+					}
+					for (var valueConstraintIndex in this.valueConstraints) {
+						hashCode += this.valueConstraints[valueConstraintIndex];
+					}
+					hashCode += this.requiredType;
+					hashCode += this.multiple;
+					return hashCode;
+				}
+			}
+		}
+
 		setDefaults.call(this, this.nodeTypesJson[name]);
+		initializeChildNodeDefs.call(this);
+		initializePropertyDefs.call(this);
+		
 		return this.nodeTypesJson[name];
 	}
 	
