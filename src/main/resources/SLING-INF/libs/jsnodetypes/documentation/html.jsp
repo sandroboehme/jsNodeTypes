@@ -27,7 +27,6 @@ limitations under the License.
 
 
 <script type="text/javascript" src="../js/jsnodetypes.js"></script>
-<script type="text/javascript" src="../documentation/json2.js"></script>
 
 <style type="text/css">
 #main {
