@@ -116,6 +116,51 @@ de.sandroboehme.NodeTypeManager = (function() {
 	        return -1;
 	    }
 	}
+	
+	/*
+	 * Adds Object.keys if its not available.
+	 * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+	 */
+	if (!Object.keys) {
+		 Object.keys = (function() {
+			 'use strict';
+			 var hasOwnProperty = Object.prototype.hasOwnProperty,
+			    hasDontEnumBug = !({ toString: null }).propertyIsEnumerable('toString'),
+			    dontEnums = [
+			      'toString',
+			      'toLocaleString',
+			      'valueOf',
+			      'hasOwnProperty',
+			      'isPrototypeOf',
+			      'propertyIsEnumerable',
+			      'constructor'
+			    ],
+			    dontEnumsLength = dontEnums.length;
+
+			return function(obj) {
+			  if (typeof obj !== 'object' && (typeof obj !== 'function' || obj === null)) {
+			    throw new TypeError('Object.keys called on non-object');
+			  }
+
+			  var result = [], prop, i;
+
+			  for (prop in obj) {
+			    if (hasOwnProperty.call(obj, prop)) {
+			      result.push(prop);
+			    }
+			  }
+
+			  if (hasDontEnumBug) {
+			    for (i = 0; i < dontEnumsLength; i++) {
+			      if (hasOwnProperty.call(obj, dontEnums[i])) {
+			        result.push(dontEnums[i]);
+			      }
+			    }
+			  }
+			  return result;
+			};
+
+			}()); }
 
 	/*
 	 * This function walks recursively through all parent node types and calls the processing function with the current node type
@@ -140,6 +185,9 @@ de.sandroboehme.NodeTypeManager = (function() {
 			
 			newNodeType = this.getNodeType(newNodeTypeName);
 			
+			/* 
+			 * skip the processing of node types that have already been processed
+			 */
 			var notProcessedYet = processedNodeTypes.indexOf(newNodeTypeName) < 0;
 			if (notProcessedYet){
 				processNodeTypeGraph.call(this, newNodeType, iterationProperty, processingFunction, processedNodeTypes);
@@ -217,6 +265,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 
 			/*
 			 * Returns the child node definitions of the node type and those of all inherited node types.
+			 * Definitions with the same child node name are returned if they differ in any other attribute.
 			 */
 			this.nodeTypesJson[name].getAllChildNodeDefinitions = function(){
 				var allCollectedChildNodeDefs = [];
@@ -238,6 +287,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 			};
 			/*
 			 * Returns the property definitions of the node type and those of all inherited node types.
+			 * Definitions with the same property name are returned if they differ in any other attribute. 
 			 */
 			this.nodeTypesJson[name].getAllPropertyDefinitions = function(){
 				var allCollectedPropertyDefs = [];
@@ -298,32 +348,52 @@ de.sandroboehme.NodeTypeManager = (function() {
 
 			/*
 			 * Returns all node types that can be used for child nodes of this node type and its super types.
+			 * If a child node definition specifies multiple required primary types an applicable node type has
+			 * to be a subtype of all of them. 
 			 */
 			this.nodeTypesJson[name].getApplicableChildNodeTypes = function(){
-				var applChildNodeTypes = {};
+				var allApplChildNodeTypes = {};
 
 				var cnDefs = that.nodeTypesJson[name].getAllChildNodeDefinitions();
 				for (var cnDefIndex in cnDefs) {
 					var cnDef = cnDefs[cnDefIndex];
-					var childNodeTypes = cnDef.requiredPrimaryTypes;
-					for (var childNodeTypeIndex in childNodeTypes) {
-						var childNodeTypeName = childNodeTypes[childNodeTypeIndex];
+					var nodeTypesPerChildNodeDef = {};
+					var reqChildNodeTypes = cnDef.requiredPrimaryTypes;
+					for (var reqChildNodeTypeIndex in reqChildNodeTypes) {
+						var childNodeTypeName = reqChildNodeTypes[reqChildNodeTypeIndex];
 						var childNodeType = that.getNodeType(childNodeTypeName);
-						
+						/* 
+						 * calls the function for every subtype of 'childNodeType' but skips
+						 * node types that have already been processed (e.g. because of cycles)
+						 */
 						processNodeTypeGraph.call(that, childNodeType, 'subtypes', function(currentNodeType){
 							if (currentNodeType != null) {
-								var itemNameNotYetProcessed = typeof applChildNodeTypes[cnDef.name] === "undefined";
-								if (itemNameNotYetProcessed){
-									applChildNodeTypes[cnDef.name] = {};
-								} 
-								applChildNodeTypes[cnDef.name][currentNodeType.name] = that.getNodeType(currentNodeType.name);
+								// if 'true' the type has not yet been found in _one_of_the_ required primary type's subtype tree
+								// of the child node definition
+								var cnDefWithTypeNotYetProcessed = typeof nodeTypesPerChildNodeDef[currentNodeType.name] === "undefined";
+								// This increments the occurency count of a node type in the subtype hierarchy of a required primary type. 
+								nodeTypesPerChildNodeDef[currentNodeType.name] = cnDefWithTypeNotYetProcessed ? 1 : nodeTypesPerChildNodeDef[currentNodeType.name]+1; 
 							}
 						}); 
 						
 					}
-					
+					for (var keyIndex in Object.keys(nodeTypesPerChildNodeDef)){
+						var nodeTypeName = Object.keys(nodeTypesPerChildNodeDef)[keyIndex];
+						/* 
+						 * If the type has been found in all iterations of the required primary types it means it is a subtype
+						 * of all of them and can be used for the child node definition.
+						 */
+						var nodeTypeCountInThisChildNodeDef = nodeTypesPerChildNodeDef[nodeTypeName];
+						var subtypeOfAllReqPrimaryTypes = nodeTypeCountInThisChildNodeDef === cnDef.requiredPrimaryTypes.length;
+						if (subtypeOfAllReqPrimaryTypes){
+							if (typeof allApplChildNodeTypes[cnDef.name] === "undefined") {
+								allApplChildNodeTypes[cnDef.name] = {};
+							}
+							allApplChildNodeTypes[cnDef.name][nodeTypeName] = that.getNodeType(nodeTypeName);
+						}
+					}
 				}
-				return applChildNodeTypes;
+				return allApplChildNodeTypes;
 			}
 		};
 		

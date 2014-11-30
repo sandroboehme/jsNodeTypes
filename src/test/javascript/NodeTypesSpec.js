@@ -741,27 +741,11 @@ describe('The Node Type Manager', function() {
 			expect(applicableCnTypes["cnDef2Name"]["cnDef45Sub1"]).toBeDefined();
 			
 			expect(applicableCnTypes["*"]).toBeDefined();
-			expect(Object.keySize(applicableCnTypes["*"])).toBe(15);
-			expect(applicableCnTypes["*"]["supCnDef2"]).toBeDefined();
-			expect(applicableCnTypes["*"]["supCnDef2Sub1"]).toBeDefined();
-			expect(applicableCnTypes["*"]["supCnDef2Sub11"]).toBeDefined();
-			expect(applicableCnTypes["*"]["supCnDef3"]).toBeDefined();
+			expect(Object.keySize(applicableCnTypes["*"])).toBe(4);
 			expect(applicableCnTypes["*"]["supCnDef3Def2"]).toBeDefined();
 			
 			expect(applicableCnTypes["*"]["cnDef3"]).toBeDefined();
 
-			expect(applicableCnTypes["*"]["cnDef4"]).toBeDefined();
-			//The following three node types contain a cycle within multiple required primary types that should ba handled correctly.
-			expect(applicableCnTypes["*"]["cnDef4Sub1"]).toBeDefined();
-			expect(applicableCnTypes["*"]["cnDef4Sub11"]).toBeDefined();
-			expect(applicableCnTypes["*"]["cnDef4Sub2"]).toBeDefined();
-			
-			// cnDef5Sub2, cnDef5 and cnDef2Sub2 contain a cycle. It spans over two child node definitions with the same name and
-			// should be handled correctly
-			expect(applicableCnTypes["*"]["cnDef5"]).toBeDefined();
-			expect(applicableCnTypes["*"]["cnDef5Sub1"]).toBeDefined();
-			expect(applicableCnTypes["*"]["cnDef5Sub2"]).toBeDefined();
-			
 			expect(applicableCnTypes["*"]["cnDef45"]).toBeDefined();
 			expect(applicableCnTypes["*"]["cnDef45Sub1"]).toBeDefined();
 
@@ -772,25 +756,9 @@ describe('The Node Type Manager', function() {
 		});
 		
 		it('all valid child node types with multiple requiredPrimaryTypes', function() {
-			expect(applicableCnTypes["*"]["supCnDef2"]).toBeDefined();
-			expect(applicableCnTypes["*"]["supCnDef2Sub1"]).toBeDefined();
-			expect(applicableCnTypes["*"]["supCnDef2Sub11"]).toBeDefined();
-			expect(applicableCnTypes["*"]["supCnDef3"]).toBeDefined();
-			expect(applicableCnTypes["*"]["supCnDef3Def2"]).toBeDefined();
-			
 			expect(applicableCnTypes["*"]).toBeDefined();
-			expect(applicableCnTypes["*"]["cnDef4"]).toBeDefined();
-			//The following three node types contain a cycle within multiple required primary types that should ba handled correctly.
-			expect(applicableCnTypes["*"]["cnDef4Sub1"]).toBeDefined();
-			expect(applicableCnTypes["*"]["cnDef4Sub11"]).toBeDefined();
-			expect(applicableCnTypes["*"]["cnDef4Sub2"]).toBeDefined();
-			
-			// cnDef5Sub2, cnDef5 and cnDef2Sub2 contain a cycle. It spans over two child node definitions with the same name and
-			// should be handled correctly
-			expect(applicableCnTypes["*"]["cnDef5"]).toBeDefined();
-			expect(applicableCnTypes["*"]["cnDef5Sub1"]).toBeDefined();
-			expect(applicableCnTypes["*"]["cnDef5Sub2"]).toBeDefined();
-			
+			expect(applicableCnTypes["*"]["supCnDef3Def2"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef3"]).toBeDefined();			
 			expect(applicableCnTypes["*"]["cnDef45"]).toBeDefined();
 			expect(applicableCnTypes["*"]["cnDef45Sub1"]).toBeDefined();
 		});
@@ -801,10 +769,6 @@ describe('The Node Type Manager', function() {
 			expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub1"]).toBeDefined();
 			expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub11"]).toBeDefined();
 			
-			expect(applicableCnTypes["*"]["supCnDef2"]).toBeDefined();
-			expect(applicableCnTypes["*"]["supCnDef2Sub1"]).toBeDefined();
-			expect(applicableCnTypes["*"]["supCnDef2Sub11"]).toBeDefined();
-			expect(applicableCnTypes["*"]["supCnDef3"]).toBeDefined();
 			expect(applicableCnTypes["*"]["supCnDef3Def2"]).toBeDefined();
 
 		});
