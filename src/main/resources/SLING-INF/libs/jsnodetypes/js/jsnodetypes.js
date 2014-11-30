@@ -49,6 +49,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 	    	xhr = new ActiveXObject("MSXML2.XMLHTTP.3.0");
 	    }
 		xhr.open("GET", url, false/*not async*/);
+		xhr.overrideMimeType("application/json");
 		xhr.onload = function (e) {
 		  if (xhr.readyState === 4) {
 		    if (xhr.status === 200) {

@@ -10,7 +10,6 @@
         "valueConstraints": null,
         "requiredType": "String",
         "multiple": false,
-        
         "autoCreated": false,
         "mandatory": false,
         "protected": false,
@@ -24,7 +23,6 @@
         "requiredPrimaryTypes": [
           "nt:base"
         ],
-        
         "autoCreated": false,
         "mandatory": false,
         "protected": false,
