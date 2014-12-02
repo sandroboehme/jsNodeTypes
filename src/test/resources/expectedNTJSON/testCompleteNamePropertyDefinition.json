@@ -4,7 +4,7 @@
       {
         "defaultValues": [
           {
-            "string": "myapp:myName",
+            "name": "myapp:myName",
             "type": "Name"
           }
         ],

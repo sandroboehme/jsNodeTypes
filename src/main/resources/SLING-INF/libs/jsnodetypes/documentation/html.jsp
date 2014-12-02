@@ -1,17 +1,20 @@
 <%--
-Copyright 2013 Sandro Boehme
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+   http://www.apache.org/licenses/LICENSE-2.0
 
-  http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
 --%>
 
 <!DOCTYPE html>
@@ -27,7 +30,6 @@ limitations under the License.
 
 
 <script type="text/javascript" src="../js/jsnodetypes.js"></script>
-<script type="text/javascript" src="../documentation/json2.js"></script>
 
 <style type="text/css">
 #main {
@@ -114,6 +116,13 @@ function loadPropertyDefs(){
 		document.getElementById("ntMethodResult").innerHTML=JSON.stringify(propertyDefs, null, 4);
 	}
 };
+function loadApplicableChildNodeTypes(){
+	var ntJson = getNTJson();
+	if (ntJson != null){
+		var applicableChildNodeTypes = ntJson.getApplicableChildNodeTypes();
+		document.getElementById("ntMethodResult").innerHTML=JSON.stringify(applicableChildNodeTypes, null, 4);
+	}
+};
 function canAddChildNode(){
 	var ntJson = getNTJson();
 	if (ntJson != null){
@@ -153,16 +162,20 @@ function canAddChildNode(){
 		<ul class="nodeTypeMethods">
 	    	<li>
 	    		<input type="button" value="getAllChildNodeDefinitions();" onclick="loadChildNodeDefs();"/>
-				<span class="doc">That method returns the <strong>child node definitions</strong> of the node type and those <strong>of all inherited node types</strong>.</span>
+				<span class="doc">That method returns the <strong>child node definitions</strong> of the node type and those <strong>of all inherited node types</strong>.<br/>Definitions with the same name are not overwritten but aggregated. If they are equal they are only listed once.</span>
 			</li>
 			<li>
 				<input type="button" value="getAllPropertyDefinitions();" onclick="loadPropertyDefs();"/>
-				<span class="doc">That method returns the <strong>property definitions</strong> of the node type and those <strong>of all inherited node types</strong>.<br/></span>
+				<span class="doc">That method returns the <strong>property definitions</strong> of the node type and those <strong>of all inherited node types</strong>.<br/>Definitions with the same name are not overwritten but aggregated. If they are equal they are only listed once.<br/></span>
 			</li>
 			<li><input type="button" value="canAddChildNode" onclick="canAddChildNode();"/>
 					(<input type="text" value="nodeName" id="nodeName" class="parameter"/>,
 					<span style="display:inline-block" class="parameter">ntManager.getNodeType(<input type="select" value="nodeTypeToAdd" id="nodeTypeToAdd" class="parameter"/>)</span>);
 				<span class="doc"><br>That method returns `true` if a node with the specified node name and node type can be added as a child node of the current node type. The `undefined` requiredTypes and residual definitions are considered.<br/>The <strong>first parameter is the string</strong> of the node name and the <strong>second parameter is a node type object</strong> (not a string).</span>
+			</li>
+			<li>
+				<input type="button" value="getApplicableChildNodeTypes();" onclick="loadApplicableChildNodeTypes();"/>
+				<span class="doc">Returns all node types that can be used for child nodes of this node type and its super types.<br/>If a child node definition specifies multiple required primary types, only node types that are subtypes of all of them are applicable.</br>The keys on the first level are the names of the child node definitions. Its values / the keys on the second level contain the node type names and its values in turn contain the node type definition itself.</span>
 			</li>
 		</ul>
 		<div class="code">
@@ -209,6 +222,38 @@ var canAddChildNode = firstNodeType.canAddChildNode("myNodeName", nodeTypesArray
 			<li>At <pre>/libs/jsnodetypes/content/documentation.html</pre> you should be able to see and use this page.</li> 
 			<li>If you see the page: Congrats you successfully installed the jsNodeTypes library! In case you don't see it, please have a look at the next section to get it installed.</li> 
 		</ol>
+		<h2>Changes</h2>
+		<ul>
+			<li><strong>3.0</strong>
+				<ul>
+					<li>Rework of almost all of the runtime source code to remove the Google Gson dependency and use the sling.commons.json dependency instead as the latter it is already part of the Sling launchpad and Gson is not.</li>
+					<li>Added the new types of JCR 2.0: 'weakReference', 'uri', 'undefined' and 'decimal' as types for default values.</li>
+					<li><strong>Non backwards compatible changes:</strong> Changed the format of the default values:
+						<ul>
+							<li>The 'name' value can now be found with the 'name' key. Not with the 'string' key anymore.</li>
+							<li>The 'path' value can now be found with the 'path' key. Not with the 'string' key anymore.</li>
+							<li>The 'reference' value can now be found with the 'reference' key. Not with the 'string' key anymore.</li>
+							<li>The format of the 'date' value changed to provide more information from the Calendar object that is retrieved from the repository. Until this version the date value contained a JavaScript
+							object like this: '{"year": 2012, "month": 1, "dayOfMonth": 1, "hourOfDay": 0, "minute": 0, "second": 0}' and now it is a String containing an ISO8601 date. E.g. "2012-02-01T00:00:00.000+01:00". 
+							For the date ISO8601 conversion the dependency to 'jackrabbit-jcr-commons' has been added which is already part of the sling launchpad. 
+							</li>
+							<li>Empty 'declaredChildNodeDefinitions', 'declaredSupertypes' and 'declaredPropertyDefinitions' are not part of the JSON output anymore.</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li><strong>2.0</strong>
+				<ul>
+					<li>getApplicableChildNodeTypes() added</li>
+					<li><strong>Non backwards compatible changes:</strong> getAllChildNodeDefinitions() and getAllPropertyDefinitions() changed to now return definitions with the same name as well. But only if they differ in any other way.</li>
+				</ul>
+			</li>
+			<li><strong>1.0</strong>
+				<ul>
+					<li>Initial version</li>
+				</ul>
+			</li>
+		</ul>
 		<h2>Support</h2>
 		<p>
 		Bugs can be opened at the <a href="https://github.com/sandroboehme/jsNodeTypes/issues">GitHub issue tracker for the project</a>. For questions I will be monitoring the Sling users mailing list (users@sling.apache.org).
@@ -224,8 +269,9 @@ var canAddChildNode = firstNodeType.canAddChildNode("myNodeName", nodeTypesArray
 	 		<li>and returns the result back to the JavaScript client.</li>
 	 	</ul>
 	 	<p>When <code>ntManager.getNodeType(nodeTypeName)</code> is called at the client side, the defaults are added again and 
-	 	the <code>getAllChildNodeDefinitions()</code>, <code>getAllPropertyDefinitions()</code> and <code>canAddChildNode(nodeName, nodeTypeToAdd)</code> functions are added lazily to the JSON object / JavaScript object literal and are finally returned.
+	 	the methods are added to the JSON object / JavaScript object literal and are finally returned.
 	 	</p>
+	 	<p>The internal 'processNodeTypeGraph()' method in jsnodetype.js is the basis for the other methods as it collects the needed data.</p>
 		<h2>Tests</h2>
 		<p>All JavaScript tests and Java tests are run in the Maven test phase as usual.
 		<h3>JavaScript</h3>
@@ -236,7 +282,7 @@ var canAddChildNode = firstNodeType.canAddChildNode("myNodeName", nodeTypesArray
 		<code>org.apache.sling.commons.json.test.JSONAssert</code>. If somebody knows a better way to reuse this class please open an bug and let me know.
 		</p>
 		<h2>Build</h2>
-		<p>You can check out the sources from <code>https://github.com/sandroboehme/jsNodeTypes</code> and build them with Maven. Use<br>
+		<p>You can check out the sources from <a href="https://github.com/sandroboehme/jsNodeTypes">https://github.com/sandroboehme/jsNodeTypes</a> and build them with Maven. Use<br>
 		<code>mvn install, mvn sling:install,  mvn deploy -DremoteOBR=http://admin:admin@localhost:8080/obr/repository.xml -DaltDeploymentRepository=local8080::default::dav:http://admin:admin@localhost:8080/obr
 		</code><br>
 		to install the library to your local Maven repo, mount the library sources to your running sling repo for a quicker development or deploy it to your local OSGi bundle repository to test the OSGi installation.

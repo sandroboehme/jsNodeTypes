@@ -1,18 +1,21 @@
-/*******************************************************************************
- * Copyright 2013 Sandro Boehme
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package de.sandroboehme.jsnodetypes;
 
 import static org.mockito.Mockito.mock;
@@ -32,18 +35,10 @@ import javax.jcr.nodetype.PropertyDefinition;
 import javax.servlet.ServletException;
 
 import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
-import org.apache.sling.commons.json.JSONTokener;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import de.sandroboehme.jsnodetypes.JSONNodeType;
-import de.sandroboehme.jsnodetypes.JSONNodeTypeDefaults;
 import de.sandroboehme.jsnodetypes.mock.MockNodeTypeGenerator;
-import de.sandroboehme.jsnodetypes.test.JSONAssert;
 
 /**
  * Tests if the JSON is generated with the default values omitted.
@@ -64,30 +59,6 @@ public class DefaultNodeTypeTest extends MockNodeTypeGenerator{
 			fileContent.append(currentLine);
 		}
 		return fileContent.toString();
-	}
-	
-	/**
-	 * Loads the defaultNT.json file that contains only default values and checks if an empty JSON object is generated from that.
-	 * Because this means the default values are actually not written.
-	 * @throws JSONException 
-	 */
-	@Test
-	public void testIfDefaultsAreOmittedWithoutServlet() throws IOException, JSONException{
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		gsonBuilder.setPrettyPrinting();
-		gsonBuilder.registerTypeAdapter(JSONNodeType.class, new JSONNodeTypeDefaults());
-		Gson gson=gsonBuilder.create();
-		
-		String json = getDefaultNTJSON(); 
-		JSONNodeType defaultNT = gson.fromJson(json, JSONNodeType.class);   
-		String jsonDeserializedFromDefaultNT = gson.toJson(defaultNT);
-		JSONObject jsonObjectDeserializedFromDefaultNT = new JSONObject(new JSONTokener(jsonDeserializedFromDefaultNT));
-		
-		String expectedNTJSON = super.getExpectedNTJSON("testIfDefaultsAreOmittedWithoutServlet");
-
-		
-		JSONAssert.assertEquals("Actual JSON: " + jsonDeserializedFromDefaultNT + "\nExpected JSON: " + expectedNTJSON, new JSONObject(
-				new JSONTokener(expectedNTJSON)), jsonObjectDeserializedFromDefaultNT);
 	}
 
 	/**

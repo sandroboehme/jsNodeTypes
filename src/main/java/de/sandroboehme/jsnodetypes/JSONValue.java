@@ -1,28 +1,33 @@
-/*******************************************************************************
- * Copyright 2013 Sandro Boehme
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package de.sandroboehme.jsnodetypes;
-
-import java.util.Calendar;
 
 import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.ValueFormatException;
+import javax.jcr.nodetype.PropertyDefinition;
+import javax.jcr.version.OnParentVersionAction;
 
-import com.google.gson.annotations.SerializedName;
+import org.apache.jackrabbit.util.ISO8601;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
 
 /**
  * Represents a javax.jcr.Value in JSON.
@@ -30,92 +35,75 @@ import com.google.gson.annotations.SerializedName;
  */
 public class JSONValue {
 
-	protected String string;
-	protected Calendar date;
-	//binary
-	@SerializedName("double")
-	protected Double aDouble;
-	@SerializedName("long")
-	protected Long aLong;
-	@SerializedName("boolean")
-	protected Boolean aBoolean;
-	protected String type;
+	transient JSONObject jsonObj = new JSONObject();
 	
-    public JSONValue(){
-    }
-    
-    public JSONValue(Value aValue) throws ValueFormatException, RepositoryException{
+    public JSONValue(Value aValue, int index, PropertyDefinition propertyDef) throws ValueFormatException, RepositoryException, IllegalStateException, JSONException{
     	switch (aValue.getType()) {
 		case PropertyType.STRING:
-	    	string = aValue.getString();
+			jsonObj.put("string", aValue.getString());
 			break;
 		case PropertyType.DATE:
-	    	date = aValue.getDate();
+	    	String date = aValue.getDate() == null ? "" : ISO8601.format(aValue.getDate());
+			jsonObj.put("date", date);
 			break;
 		case PropertyType.BINARY:
-			string = aValue.getString();
+			String binary = getBinaryDownloadURLFromPropertyDef(index, propertyDef);
+			jsonObj.put("binary", binary);
 			break;
 		case PropertyType.DOUBLE:
-	    	aDouble = aValue.getDouble();
+			jsonObj.put("double", aValue.getDouble());
 			break;
 		case PropertyType.LONG:
-	    	aLong = aValue.getLong();
+			jsonObj.put("long", aValue.getLong());
 			break;
 		case PropertyType.BOOLEAN:
-	    	aBoolean = aValue.getBoolean();
+			jsonObj.put("boolean", aValue.getBoolean());
 			break;
 		case PropertyType.NAME:
-			string = aValue.getString();
+			jsonObj.put("name",  aValue.getString());
 			break;
 		case PropertyType.PATH:
-			string = aValue.getString();
+			jsonObj.put("path",  aValue.getString());
 			break;
 		case PropertyType.REFERENCE:
-			string = aValue.getString();
+			jsonObj.put("reference",  aValue.getString());
+			break;
+/// The following property types are from JSR-283 / JCR 2.0
+		case PropertyType.WEAKREFERENCE:
+			jsonObj.put("weakReference",  aValue.getString());
+			break;
+		case PropertyType.URI:
+			jsonObj.put("uri",  aValue.getString());
+			break;
+		case PropertyType.UNDEFINED:
+			jsonObj.put("undefined",  aValue.getString());
+			break;
+		case PropertyType.DECIMAL:
+			String decimal = aValue.getDecimal() == null ? "" : aValue.getDecimal().toString();
+			jsonObj.put("decimal", decimal);
 			break;
 
 		default:
 			break;
 		}
-    	type = PropertyType.nameFromValue(aValue.getType());
+    	String type = PropertyType.nameFromValue(aValue.getType());
+		jsonObj.put("type", type);
+	}
+
+	private String getBinaryDownloadURLFromPropertyDef(int index, PropertyDefinition propertyDef) {
+		String nodeTypeName = propertyDef.getDeclaringNodeType().getName();
+		String propertyName = propertyDef.getName();
+		String propertyType = PropertyType.nameFromValue(propertyDef.getRequiredType());
+		boolean isAutoCreated = propertyDef.isAutoCreated();
+		boolean isMandatory = propertyDef.isMandatory();
+		boolean isProtected = propertyDef.isProtected();
+		boolean isMultiple = propertyDef.isMultiple();
+		String onParentVersionAction = OnParentVersionAction.nameFromValue(propertyDef.getOnParentVersion());
+		return String.format("/%s/%s/%s/%s/%s/%s/%s/%s/%s.default_binary_value.bin", nodeTypeName, propertyName,
+				propertyType, isAutoCreated, isMandatory, isProtected, isMultiple, onParentVersionAction, index);
+	}
+	
+    JSONObject getJSONObject(){
+    	return jsonObj;
     }
-    
-	public Boolean isBoolean() {
-		return aBoolean;
-	}
-	public void setBoolean(boolean aBoolean) {
-		this.aBoolean = aBoolean;
-	}
-	public Calendar getDate() {
-		return date;
-	}
-	public void setDate(Calendar date) {
-		this.date = date;
-	}
-	public Double getDouble() {
-		return aDouble;
-	}
-	public void setDouble(double aDouble) {
-		this.aDouble = aDouble;
-	}
-	public Long getLong() {
-		return this.aLong;
-	}
-	public void setLong(long aLong) {
-		this.aLong = aLong;
-	}
-
-	public String getString() {
-		return string;
-	}
-	public void setString(String aString) {
-		this.string = aString;
-	}
-	public String getType() {
-		return type;
-	}
-	public void setType(String type) {
-		this.type = type;
-	}
-
 }

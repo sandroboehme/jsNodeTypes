@@ -4,7 +4,7 @@
       {
         "defaultValues": [
           {
-            "string": "/myapp:myName/myapp:myChildNode/aSubChildNode",
+            "path": "/myapp:myName/myapp:myChildNode/aSubChildNode",
             "type": "Path"
           }
         ],

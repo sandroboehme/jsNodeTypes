@@ -1,18 +1,21 @@
 /*
-* Copyright 2013 Sandro Boehme
-* 
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-* 
-*   http://www.apache.org/licenses/LICENSE-2.0
-* 
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 describe('The Node Type Manager', function() {
 
@@ -73,29 +76,15 @@ describe('The Node Type Manager', function() {
 		//var ntManager = new de.sandroboehme.NodeTypeManager(settings);
 		var ntManager;
 
-		function createChildNodeDef(name){
-			var defaultNT = ntManager.internalGetDefaultNodeType();
-			var newChildNodeDef = {};
-			for (var childNodeDefPropName in defaultNT.declaredChildNodeDefinitions[0]) {
-				var childNodeDefPropValue = defaultNT.declaredChildNodeDefinitions[0][childNodeDefPropName];
-				newChildNodeDef[childNodeDefPropName] = childNodeDefPropValue;
-			}
-			newChildNodeDef.name = name;
-			return newChildNodeDef; 
-		};
-
-		function createPropertyDef(name){
-			var defaultNT = ntManager.internalGetDefaultNodeType();
-			var newPropDef = {};
-			for (var propNodeDefPropName in defaultNT.declaredPropertyDefinitions[0]) {
-				var propNodeDefPropValue = defaultNT.declaredPropertyDefinitions[0][propNodeDefPropName];
-				newPropDef[propNodeDefPropName] = propNodeDefPropValue;
-			}
-			newPropDef.name = name;
-			return newPropDef; 
-		};
-		
 		describe('all child node definitions from the super types ', function () {
+			
+			function arrayContainsCnDefWithName(array, cnDefName){
+				var found = false;
+				for (var i=0; i<array.length && found===false; i++){
+					found = array[i].name === cnDefName;
+				}
+				return found;
+			}
 			
 			it('with <getAllChildNodeDefinitions()>.', function() {
 				var settings = {
@@ -131,10 +120,16 @@ describe('The Node Type Manager', function() {
 						}} 
 				};
 				ntManager = new de.sandroboehme.NodeTypeManager(settings);
-				var expectedChildNodeDefs = [{ name : 'childNodeDef1' }, {name : 'childNodeDef2' }, { name : 'childNodeDef3' }, { name : 'childNodeDef4' }, { name : 'childNodeDef5' }, { name : 'childNodeDef6' }, { name : 'childNodeDef7' }, { name : 'childNodeDef8' }];
-				var expectedChildNodeDefs = [createChildNodeDef('childNodeDef1'),createChildNodeDef('childNodeDef2'), createChildNodeDef('childNodeDef3'), createChildNodeDef('childNodeDef4'), createChildNodeDef('childNodeDef5'), createChildNodeDef('childNodeDef6'), createChildNodeDef('childNodeDef7'), createChildNodeDef('childNodeDef8')];
 				var resultingChildNodeDefs = ntManager.getNodeType("aNodeType").getAllChildNodeDefinitions();
-				sameArrayContent(expectedChildNodeDefs, resultingChildNodeDefs);
+				expect(resultingChildNodeDefs.length).toBe(8);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef1")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef2")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef3")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef4")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef5")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef6")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef7")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef8")).toBe(true);
 			});
 			
 			it('with <getAllChildNodeDefinitions()> but does not contain duplicate entries from the parents.', function() {
@@ -158,10 +153,50 @@ describe('The Node Type Manager', function() {
 						}} 
 				};
 				ntManager = new de.sandroboehme.NodeTypeManager(settings);
-				var expectedChildNodeDefs = [ 'childNodeDef1', 'childNodeDef2'];
-				var expectedChildNodeDefs = [createChildNodeDef('childNodeDef1'), createChildNodeDef('childNodeDef2')];
 				var resultingChildNodeDefs = ntManager.getNodeType("aNodeType").getAllChildNodeDefinitions();
-				sameArrayContent(expectedChildNodeDefs, resultingChildNodeDefs);
+				expect(resultingChildNodeDefs.length).toBe(2);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef1")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef2")).toBe(true);
+			});
+			
+			it('with <getAllChildNodeDefinitions()> and lists child node definitions with the same name but different content.', function() {
+				var settings = {
+						"defaultNTJsonURL": defaultNTJsonURL,
+						"nodeTypesJson" : {"aNodeType" : {
+							"declaredSupertypes" : [ "aParentNodeType" ],
+							"declaredChildNodeDefinitions" : [{
+									"name" : "childNodeDef1",
+							        "requiredPrimaryTypes": [
+							            "aNodeType"
+		                            ],
+								},{
+									"name" : "childNodeDef2"
+								} 
+							]
+						},"aParentNodeType" : {
+							"declaredSupertypes" : [ "aGrandParentNodeType" ],
+							"declaredChildNodeDefinitions" : [{
+									"name" : "childNodeDef1"
+								},{
+									"name" : "childNodeDef2"
+								} 
+							]
+						},"aGrandParentNodeType" : {
+							"declaredChildNodeDefinitions" : [{
+									"name" : "childNodeDef1"
+								}
+							]
+						},"nt:base" : {
+							"declaredSupertypes" : []
+						}} 
+				};
+				ntManager = new de.sandroboehme.NodeTypeManager(settings);
+				var resultingChildNodeDefs = ntManager.getNodeType("aNodeType").getAllChildNodeDefinitions();
+				
+				expect(resultingChildNodeDefs.length).toBe(3);
+				
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef1")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef2")).toBe(true);
 			});
 			
 			it('with <getAllChildNodeDefinitions()> but does not follow circular dependencies.', function() {
@@ -193,15 +228,28 @@ describe('The Node Type Manager', function() {
 						}} 
 				};
 				ntManager = new de.sandroboehme.NodeTypeManager(settings);
-		
-				var expectedChildNodeDefs = [createChildNodeDef('childNodeDef1'), createChildNodeDef('childNodeDef2'), createChildNodeDef('childNodeDef3'), createChildNodeDef('childNodeDef4'), createChildNodeDef('childNodeDef5'), createChildNodeDef('childNodeDef6') ];
 	
 				var resultingChildNodeDefs = ntManager.getNodeType("aNodeType").getAllChildNodeDefinitions();
-				sameArrayContent(expectedChildNodeDefs, resultingChildNodeDefs);
+				expect(resultingChildNodeDefs.length).toBe(6);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef1")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef2")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef3")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef4")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef5")).toBe(true);
+				expect(arrayContainsCnDefWithName(resultingChildNodeDefs, "childNodeDef6")).toBe(true);
 			});
 		});
 	
 		describe('all property definitions from the super types', function () {
+			
+			function arrayContainsPropDefWithName(array, propDefName){
+				var found = false;
+				for (var i=0; i<array.length && found===false; i++){
+					found = array[i].name === propDefName;
+				}
+				return found;
+			}
+			
 			it('with <getAllPropertyDefinitions()>', function() {
 				var settings = {
 						"defaultNTJsonURL": defaultNTJsonURL,
@@ -236,9 +284,16 @@ describe('The Node Type Manager', function() {
 						}}
 				};
 				ntManager = new de.sandroboehme.NodeTypeManager(settings);
-				var expectedPropertyDefs = [createPropertyDef('propertyDef1'), createPropertyDef('propertyDef2'), createPropertyDef('propertyDef3'), createPropertyDef('propertyDef4'), createPropertyDef('propertyDef5'), createPropertyDef('propertyDef6'), createPropertyDef('propertyDef7'), createPropertyDef('propertyDef8') ];
 				var resultingPropertyDefs = ntManager.getNodeType("aNodeType").getAllPropertyDefinitions();
-				sameArrayContent(expectedPropertyDefs, resultingPropertyDefs);
+				expect(resultingPropertyDefs.length).toBe(8);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef1")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef2")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef3")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef4")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef5")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef6")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef7")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef8")).toBe(true);
 			});
 			
 			it('with <getAllPropertyDefinitions()> but does not contain duplicate entries from the parents.', function() {
@@ -269,9 +324,67 @@ describe('The Node Type Manager', function() {
 						}}
 				};
 				ntManager = new de.sandroboehme.NodeTypeManager(settings);
-				var expectedPropertyDefs = [createPropertyDef('propertyDef1'), createPropertyDef('propertyDef2') ];
 				var resultingPropertyDefs = ntManager.getNodeType("aNodeType").getAllPropertyDefinitions();
-				sameArrayContent(expectedPropertyDefs, resultingPropertyDefs);
+				expect(resultingPropertyDefs.length).toBe(2);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef1")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef2")).toBe(true);
+			});
+			
+			it('with <getAllPropertyDefinitions()>  and lists property definitions with the same name but different content.', function() {
+				var settings = {
+						"defaultNTJsonURL": defaultNTJsonURL,
+						"nodeTypesJson" : {"aNodeType" : {
+							"declaredSupertypes" : [ "aParentNodeType" ],
+							"declaredPropertyDefinitions" : [{
+								"name" : "propertyDef1",
+								"multiple": true
+								},{
+								"name" : "propertyDef2",
+								"multiple": true
+								} 
+							]
+						},"aParentNodeType" : {
+							"declaredSupertypes" : [ "aGrandParentNodeType" ],
+							"declaredPropertyDefinitions" : [{
+								"name" : "propertyDef1"
+								},{
+								"name" : "propertyDef2",
+								"multiple": true
+								} 
+							]
+						},"aGrandParentNodeType" : {
+							"declaredSupertypes" : [ "aGrandGrandParentNodeType" ],
+							"declaredPropertyDefinitions" : [{
+								"name" : "propertyDef1",
+						        "valueConstraints": [
+						          "nt:versionHistory"
+						        ],
+								},{
+								"name" : "propertyDef2",
+								"multiple": true
+								} 
+							]
+						},"aGrandGrandParentNodeType" : {
+							"declaredPropertyDefinitions" : [{
+								"name" : "propertyDef1",
+								"defaultValues": [{
+									"name": "nt:base",
+									"type": "Name"
+                                }],
+								},{
+								"name" : "propertyDef2",
+								"multiple": true
+								} 
+							]
+						},"nt:base" : {
+							"declaredSupertypes" : []
+						}}
+				};
+				ntManager = new de.sandroboehme.NodeTypeManager(settings);
+				var resultingPropertyDefs = ntManager.getNodeType("aNodeType").getAllPropertyDefinitions();
+				expect(resultingPropertyDefs.length).toBe(5);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef1")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef2")).toBe(true);
 			});
 			
 			it('with <getAllPropertyDefinitions()> but does not follow circular dependencies.', function() {
@@ -303,9 +416,14 @@ describe('The Node Type Manager', function() {
 						}}
 				};
 				ntManager = new de.sandroboehme.NodeTypeManager(settings);
-				var expectedPropertyDefs = [createPropertyDef('propertyDef1'), createPropertyDef('propertyDef2'), createPropertyDef('propertyDef3'), createPropertyDef('propertyDef4'), createPropertyDef('propertyDef5'), createPropertyDef('propertyDef6')];
 				var resultingPropertyDefs = ntManager.getNodeType("aNodeType").getAllPropertyDefinitions();
-				sameArrayContent(expectedPropertyDefs, resultingPropertyDefs);
+				expect(resultingPropertyDefs.length).toBe(6);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef1")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef2")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef3")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef4")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef5")).toBe(true);
+				expect(arrayContainsPropDefWithName(resultingPropertyDefs, "propertyDef6")).toBe(true);
 			});
 
 		});
@@ -362,7 +480,10 @@ describe('The Node Type Manager', function() {
 					    ],
 					    "declaredPropertyDefinitions": [
 					      {
-					        "defaultValues": "a default value",
+					        "defaultValues":  [{
+								"string": "a default value",
+								"type": "String"
+                            }],
 					        "valueConstraints": ["banana","apple"],
 					        "requiredType": "String",
 					        "multiple": true,
@@ -419,6 +540,248 @@ describe('The Node Type Manager', function() {
 				compareItemDefitions(ntManager.getNodeType("nt").getAllChildNodeDefinitions(), settings.nodeTypesJson.nt.declaredChildNodeDefinitions);
 			});
 		});			
+	});
+
+	describe('returns in getApplicableChildNodeTypes()', function () {
+		var settings = {
+				"defaultNTJsonURL": defaultNTJsonURL,
+				"nodeTypesJson" : {
+					"nt:base" : {
+					},
+					"aSuperType" : {
+					    "declaredChildNodeDefinitions": [
+					     {
+					    	 "requiredPrimaryTypes": [
+					    	     "supCnDef1"
+					    	 ],
+					      	 "name" : "supCnDef1Name"
+					      },
+					      {
+						     "requiredPrimaryTypes": [
+	  					  		"supCnDef3",
+						  		"supCnDef2"
+						     ],
+						     "name" : "*"
+						  }
+					    ]
+					},
+					"mix:supSupCnDef1" : {
+					    "mixin": true
+					},
+					"mix:supSupCnDef2" : {
+					    "mixin": true
+					},
+					"supCnDef1" : {
+					    "declaredSupertypes": [
+					  		"mix:supSupCnDef1",
+					  		"mix:supSupCnDef2"
+					  	]
+					},
+					"supCnDef1Sub1" : {
+					    "declaredSupertypes": [
+					  		"supCnDef1"
+					  	]
+					},
+					"supCnDef1Sub11" : {
+					    "declaredSupertypes": [
+					  		"supCnDef1Sub1"
+					  	]
+					},
+					"supCnDef2": {
+					},
+					"supCnDef2Sub1" : {
+					    "declaredSupertypes": [
+					  		"supCnDef2"
+					  	]
+					},
+					"supCnDef2Sub11" : {
+					    "declaredSupertypes": [
+					  		"supCnDef2Sub1"
+					  	]
+					},
+					"supCnDef3": {
+					},
+					"supCnDef3Def2" : {
+					    "declaredSupertypes": [
+					  		"supCnDef3",
+					  		"supCnDef2"
+					  	]
+					},
+					"aNodeType" : {
+					    "declaredSupertypes": [
+					        "aSuperType"
+ 					    ],
+ 					    "declaredChildNodeDefinitions": [
+					     {
+					    	 "requiredPrimaryTypes": [
+					    	     "cnDef1"
+					    	 ],
+					      	 "name" : "cnDef1Name"
+					      },
+					      {
+						     "requiredPrimaryTypes": [
+						          "cnDef2"
+						     ],
+						     "name" : "cnDef2Name"
+					      },
+					      {
+						     "requiredPrimaryTypes": [
+						          "cnDef3"
+						     ],
+						     "name" : "*"
+							  
+					      },
+					      {
+						     "requiredPrimaryTypes": [
+						          "cnDef4",
+						          "cnDef5"
+						     ],
+						     "name" : "*"
+					      }
+					    ]
+					},
+					"cnDef1" : {
+					},
+					"cnDef2" : {
+					},
+					"cnDef2Sub1" : {
+					    "declaredSupertypes": [
+					        "cnDef2"
+					  	]
+					},
+					"cnDef2Sub11" : {
+					    "declaredSupertypes": [
+					        "cnDef2Sub1"
+					  	]
+					},
+					"cnDef2Sub2" : {
+					    "declaredSupertypes": [
+					        "cnDef2"
+					  	]
+					},
+					"cnDef3" : {
+					},
+					"cnDef4" : {
+					},
+					"cnDef5" : {
+					    "declaredSupertypes": [
+					  		"cnDef2Sub2"
+					  	]
+					},
+					"cnDef4Sub1" : {
+					    "declaredSupertypes": [
+					  		"cnDef4"
+					  	]
+					},
+					"cnDef4Sub11" : {
+					    "declaredSupertypes": [
+					  		"cnDef4Sub1"
+					  	]
+					},
+					"cnDef4Sub2" : {
+					    "declaredSupertypes": [
+					  		"cnDef4"
+					  	]
+					},
+					"cnDef5Sub1" : {
+					    "declaredSupertypes": [
+					  		"cnDef5"
+					  	]
+					},
+					"cnDef5Sub2" : {
+					    "declaredSupertypes": [
+					  		"cnDef5",
+					  		"cnDef2Sub2"
+					  	]
+					},
+					"cnDef45" : {
+					    "declaredSupertypes": [
+					  		"cnDef4Sub11",
+					  		"cnDef5Sub2"
+					  	]
+					},
+					"cnDef45Sub1" : {
+					    "declaredSupertypes": [
+					  		"cnDef45"
+					  	]
+					}
+				}
+		};
+
+		// see "/src/test/resources/applicableChildNodeTypesDatastructure.jpg" for a
+		// description of the test datastructure
+		
+		var ntManager = new de.sandroboehme.NodeTypeManager(settings);
+		var ntBase = ntManager.getNodeType("nt:base");
+		var ntResidualChild = ntManager.getNodeType("ntResidualChild");
+
+		var applicableCnTypes = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypes();
+
+		
+		/* adding an keySize function to Object */
+		if (typeof Object.keySize === "undefined") {
+			Object.keySize = function(obj) {
+			    var keySize = 0, key;
+			    for (key in obj) {
+			        if (obj.hasOwnProperty(key)) keySize++;
+			    }
+			    return keySize;
+			};
+		}
+		
+		it('all valid child node types', function() {
+			expect(applicableCnTypes!=null).toBe(true);
+			expect(applicableCnTypes).toBeDefined();
+			
+			expect(applicableCnTypes["cnDef1Name"]).toBeDefined();
+			expect(Object.keySize(applicableCnTypes["cnDef1Name"])).toBe(1);
+			expect(applicableCnTypes["cnDef1Name"]["cnDef1"]).toBeDefined();
+
+			expect(applicableCnTypes["cnDef2Name"]).toBeDefined();
+			expect(Object.keySize(applicableCnTypes["cnDef2Name"])).toBe(9);
+			expect(applicableCnTypes["cnDef2Name"]["cnDef2"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef2Sub1"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef2Sub11"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef2Sub2"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef5"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef5Sub1"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef5Sub2"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef45"]).toBeDefined();
+			expect(applicableCnTypes["cnDef2Name"]["cnDef45Sub1"]).toBeDefined();
+			
+			expect(applicableCnTypes["*"]).toBeDefined();
+			expect(Object.keySize(applicableCnTypes["*"])).toBe(4);
+			expect(applicableCnTypes["*"]["supCnDef3Def2"]).toBeDefined();
+			
+			expect(applicableCnTypes["*"]["cnDef3"]).toBeDefined();
+
+			expect(applicableCnTypes["*"]["cnDef45"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef45Sub1"]).toBeDefined();
+
+			expect(applicableCnTypes["supCnDef1Name"]).toBeDefined();
+			expect(Object.keySize(applicableCnTypes["supCnDef1Name"])).toBe(3);
+			expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub1"]).toBeDefined();
+			expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub11"]).toBeDefined();
+		});
+		
+		it('all valid child node types with multiple requiredPrimaryTypes', function() {
+			expect(applicableCnTypes["*"]).toBeDefined();
+			expect(applicableCnTypes["*"]["supCnDef3Def2"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef3"]).toBeDefined();			
+			expect(applicableCnTypes["*"]["cnDef45"]).toBeDefined();
+			expect(applicableCnTypes["*"]["cnDef45Sub1"]).toBeDefined();
+		});
+		
+		it('all valid super types\' child node types and its subtypes including multiple requiredPrimaryTypes', function() {
+			expect(applicableCnTypes["supCnDef1Name"]).toBeDefined();
+			expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub1"]).toBeDefined();
+			expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub1"]).toBeDefined();
+			expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub11"]).toBeDefined();
+			
+			expect(applicableCnTypes["*"]["supCnDef3Def2"]).toBeDefined();
+
+		});
+
 	});
 
 	describe('checks in canAddChildNode()', function () {
@@ -525,7 +888,9 @@ describe('The Node Type Manager', function() {
 	function sameArrayContent(array1, array2){
 		expect(array1.length).toBe(array2.length); 
 		for (var i=0; i<array2.length; i++){
-			expect(array1).toContain(array2[i]);
+			if (typeof array2[i] !== "undefined") {
+				expect(array1).toContain(array2[i]);
+			}
 		}
 	}
 
