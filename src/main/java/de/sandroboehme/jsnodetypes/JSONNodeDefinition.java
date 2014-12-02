@@ -21,27 +21,27 @@ import java.util.List;
 import javax.jcr.nodetype.NodeDefinition;
 import javax.jcr.nodetype.NodeType;
 
+import org.apache.sling.commons.json.JSONArray;
+import org.apache.sling.commons.json.JSONException;
+
 /**
  * Represents a NodeDefinition in JSON.
  *
  */
 public class JSONNodeDefinition extends JSONItemDefinition {
 
-	private boolean allowsSameNameSiblings;
-	private String defaultPrimaryType;
-	private String[] requiredPrimaryTypes;
-
-	public JSONNodeDefinition() {
-	}
-
-	public JSONNodeDefinition(NodeDefinition childNodeDefinition) {
+	public JSONNodeDefinition(NodeDefinition childNodeDefinition) throws JSONException {
 		super(childNodeDefinition);
 
-		this.setAllowsSameNameSiblings(childNodeDefinition.allowsSameNameSiblings());
-		
+		if (childNodeDefinition.allowsSameNameSiblings()){
+			jsonObj.put("allowsSameNameSiblings", true);
+		}
 		NodeType defaultPrimaryType = childNodeDefinition.getDefaultPrimaryType();
-		if (defaultPrimaryType != null) {
-			this.setDefaultPrimaryType(defaultPrimaryType.getName());
+		if (defaultPrimaryType!=null){
+			String defaultPrimaryTypeName = defaultPrimaryType.getName();
+			if (defaultPrimaryTypeName != null && !defaultPrimaryTypeName.equals("")){
+				jsonObj.put("defaultPrimaryType", defaultPrimaryTypeName);
+			}
 		}
 
 		NodeType[] primaryTypes = childNodeDefinition.getRequiredPrimaryTypes();
@@ -52,32 +52,9 @@ public class JSONNodeDefinition extends JSONItemDefinition {
 				primaryTypeNames.add(primaryTypeName);
 			}
 		}
-
-		this.setRequiredPrimaryTypes(primaryTypeNames.toArray(new String[primaryTypeNames.size()]));
-	}
-
-	public boolean isAllowsSameNameSiblings() {
-		return allowsSameNameSiblings;
-	}
-
-	public void setAllowsSameNameSiblings(boolean allowsSameNameSiblings) {
-		this.allowsSameNameSiblings = allowsSameNameSiblings;
-	}
-
-	public String getDefaultPrimaryType() {
-		return defaultPrimaryType;
-	}
-
-	public void setDefaultPrimaryType(String defaultPrimaryType) {
-		this.defaultPrimaryType = defaultPrimaryType;
-	}
-
-	public String[] getRequiredPrimaryTypes() {
-		return requiredPrimaryTypes;
-	}
-
-	public void setRequiredPrimaryTypes(String[] requiredPrimaryTypes) {
-		this.requiredPrimaryTypes = requiredPrimaryTypes;
+		if (primaryTypeNames.size()>0 && !(primaryTypeNames.size()==1 && primaryTypeNames.get(0).equals("nt:base")) ){
+			jsonObj.put("requiredPrimaryTypes", new JSONArray(primaryTypeNames));
+		}
 	}
 
 }

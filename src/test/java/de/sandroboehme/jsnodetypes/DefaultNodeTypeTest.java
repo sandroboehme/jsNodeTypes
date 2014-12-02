@@ -32,18 +32,10 @@ import javax.jcr.nodetype.PropertyDefinition;
 import javax.servlet.ServletException;
 
 import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
-import org.apache.sling.commons.json.JSONTokener;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import de.sandroboehme.jsnodetypes.JSONNodeType;
-import de.sandroboehme.jsnodetypes.JSONNodeTypeDefaults;
 import de.sandroboehme.jsnodetypes.mock.MockNodeTypeGenerator;
-import de.sandroboehme.jsnodetypes.test.JSONAssert;
 
 /**
  * Tests if the JSON is generated with the default values omitted.
@@ -64,30 +56,6 @@ public class DefaultNodeTypeTest extends MockNodeTypeGenerator{
 			fileContent.append(currentLine);
 		}
 		return fileContent.toString();
-	}
-	
-	/**
-	 * Loads the defaultNT.json file that contains only default values and checks if an empty JSON object is generated from that.
-	 * Because this means the default values are actually not written.
-	 * @throws JSONException 
-	 */
-	@Test
-	public void testIfDefaultsAreOmittedWithoutServlet() throws IOException, JSONException{
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		gsonBuilder.setPrettyPrinting();
-		gsonBuilder.registerTypeAdapter(JSONNodeType.class, new JSONNodeTypeDefaults());
-		Gson gson=gsonBuilder.create();
-		
-		String json = getDefaultNTJSON(); 
-		JSONNodeType defaultNT = gson.fromJson(json, JSONNodeType.class);   
-		String jsonDeserializedFromDefaultNT = gson.toJson(defaultNT);
-		JSONObject jsonObjectDeserializedFromDefaultNT = new JSONObject(new JSONTokener(jsonDeserializedFromDefaultNT));
-		
-		String expectedNTJSON = super.getExpectedNTJSON("testIfDefaultsAreOmittedWithoutServlet");
-
-		
-		JSONAssert.assertEquals("Actual JSON: " + jsonDeserializedFromDefaultNT + "\nExpected JSON: " + expectedNTJSON, new JSONObject(
-				new JSONTokener(expectedNTJSON)), jsonObjectDeserializedFromDefaultNT);
 	}
 
 	/**

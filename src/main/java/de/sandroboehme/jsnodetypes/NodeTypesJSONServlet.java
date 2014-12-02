@@ -17,8 +17,6 @@ package de.sandroboehme.jsnodetypes;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
@@ -36,11 +34,10 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Returns all completely registered node types of the repository in JSON format. Nodetypes without names will not end up in the JSON file.
@@ -76,24 +73,22 @@ public class NodeTypesJSONServlet extends SlingSafeMethodsServlet {
 		Resource resource = request.getResource();
 		Node currentNode = resource.adaptTo(Node.class);
 		try {
-			Map<String, JSONNodeType> nodeTypeMap = new HashMap<String, JSONNodeType>();
 			NodeTypeIterator nodeTypeIterator = currentNode.getSession().getWorkspace().getNodeTypeManager().getAllNodeTypes();
+	        JSONObject nodeTypes = new JSONObject();
 			while (nodeTypeIterator.hasNext()) {
 				NodeType nodeType = nodeTypeIterator.nextNodeType();
 				if (nodeType.getName() != null) {
 					JSONNodeType jsonNodeType = new JSONNodeType(nodeType);
-					nodeTypeMap.put(nodeType.getName(), jsonNodeType);
+					nodeTypes.put(nodeType.getName(), jsonNodeType.getJson());
 				}
 			}
-
-			GsonBuilder gsonBuilder = new GsonBuilder();
-			gsonBuilder.setPrettyPrinting();
-			gsonBuilder.registerTypeAdapter(JSONNodeType.class, new JSONNodeTypeDefaults());
-			Gson gson=gsonBuilder.create();
-			writer.println(gson.toJson(nodeTypeMap));
+			writer.println(nodeTypes.toString(2));
 			writer.flush();
 			writer.close();
 		} catch (RepositoryException e) {
+			log.error("Could not generate the node types.", e);
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		} catch (JSONException e) {
 			log.error("Could not generate the node types.", e);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}

@@ -365,7 +365,7 @@ describe('The Node Type Manager', function() {
 							"declaredPropertyDefinitions" : [{
 								"name" : "propertyDef1",
 								"defaultValues": [{
-									"string": "nt:base",
+									"name": "nt:base",
 									"type": "Name"
                                 }],
 								},{
@@ -477,7 +477,10 @@ describe('The Node Type Manager', function() {
 					    ],
 					    "declaredPropertyDefinitions": [
 					      {
-					        "defaultValues": "a default value",
+					        "defaultValues":  [{
+								"string": "a default value",
+								"type": "String"
+                            }],
 					        "valueConstraints": ["banana","apple"],
 					        "requiredType": "String",
 					        "multiple": true,
@@ -702,6 +705,9 @@ describe('The Node Type Manager', function() {
 				}
 		};
 
+		// see "/src/test/resources/applicableChildNodeTypesDatastructure.jpg" for a
+		// description of the test datastructure
+		
 		var ntManager = new de.sandroboehme.NodeTypeManager(settings);
 		var ntBase = ntManager.getNodeType("nt:base");
 		var ntResidualChild = ntManager.getNodeType("ntResidualChild");

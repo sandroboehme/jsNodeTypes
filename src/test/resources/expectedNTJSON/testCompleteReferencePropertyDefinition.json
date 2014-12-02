@@ -4,7 +4,7 @@
       {
         "defaultValues": [
           {
-            "string": "nt:unstructured",
+            "reference": "nt:unstructured",
             "type": "Reference"
           }
         ],

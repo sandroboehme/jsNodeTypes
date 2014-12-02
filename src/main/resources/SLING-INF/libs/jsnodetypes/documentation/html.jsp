@@ -221,10 +221,28 @@ var canAddChildNode = firstNodeType.canAddChildNode("myNodeName", nodeTypesArray
 		</ol>
 		<h2>Changes</h2>
 		<ul>
+			<li><strong>3.0</strong>
+				<ul>
+					<li>Rework of almost all of the runtime source code to remove the Google Gson dependency and use the sling.commons.json dependency instead as the latter it is already part of the Sling launchpad and Gson is not.</li>
+					<li>Added the new types of JCR 2.0: 'weakReference', 'uri', 'undefined' and 'decimal' as types for default values.</li>
+					<li><strong>Non backwards compatible changes:</strong> Changed the format of the default values:
+						<ul>
+							<li>The 'name' value can now be found with the 'name' key. Not with the 'string' key anymore.</li>
+							<li>The 'path' value can now be found with the 'path' key. Not with the 'string' key anymore.</li>
+							<li>The 'reference' value can now be found with the 'reference' key. Not with the 'string' key anymore.</li>
+							<li>The format of the 'date' value changed to provide more information from the Calendar object that is retrieved from the repository. Until this version the date value contained a JavaScript
+							object like this: '{"year": 2012, "month": 1, "dayOfMonth": 1, "hourOfDay": 0, "minute": 0, "second": 0}' and now it is a String containing an ISO8601 date. E.g. "2012-02-01T00:00:00.000+01:00". 
+							For the date ISO8601 conversion the dependency to 'jackrabbit-jcr-commons' has been added which is already part of the sling launchpad. 
+							</li>
+							<li>Empty 'declaredChildNodeDefinitions', 'declaredSupertypes' and 'declaredPropertyDefinitions' are not part of the JSON output anymore.</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
 			<li><strong>2.0</strong>
 				<ul>
-					<li>getAllChildNodeDefinitions() and getAllPropertyDefinitions() changed to now return definitions with the same name as well. But only if they differ in any other way. <strong>This makes it not backwards compatible.</strong></li>
 					<li>getApplicableChildNodeTypes() added</li>
+					<li><strong>Non backwards compatible changes:</strong> getAllChildNodeDefinitions() and getAllPropertyDefinitions() changed to now return definitions with the same name as well. But only if they differ in any other way.</li>
 				</ul>
 			</li>
 			<li><strong>1.0</strong>

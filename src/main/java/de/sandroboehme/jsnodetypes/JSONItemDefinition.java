@@ -18,61 +18,39 @@ package de.sandroboehme.jsnodetypes;
 import javax.jcr.nodetype.ItemDefinition;
 import javax.jcr.version.OnParentVersionAction;
 
-import com.google.gson.annotations.SerializedName;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
 
 /**
  * Represents an ItemDefinition in JSON.
  */
 public class JSONItemDefinition {
 
-	private boolean autoCreated;
-	private boolean mandatory;
-	@SerializedName("protected")
-	private boolean isProtected;
-	private String onParentVersion = OnParentVersionAction.ACTIONNAME_COPY;
-	private String name;
+	protected JSONObject jsonObj = new JSONObject();
 	
-	public JSONItemDefinition(){
-	}
-	
-	public JSONItemDefinition(ItemDefinition itemDefinition) {
-		this.setName(itemDefinition.getName());
-		this.setAutoCreated(itemDefinition.isAutoCreated());
-		this.setMandatory(itemDefinition.isMandatory());
+	public JSONItemDefinition(ItemDefinition itemDefinition) throws JSONException {
+		
+		jsonObj.put("name", itemDefinition.getName());
+		
+		if (itemDefinition.isAutoCreated()){
+			jsonObj.put("autoCreated", true);
+		}
+		if (itemDefinition.isMandatory()){
+			jsonObj.put("mandatory", true);
+		}
+		if (itemDefinition.isProtected()){
+			jsonObj.put("protected", true);
+		}
 		boolean onParentVersionIsUnset = itemDefinition.getOnParentVersion() == 0;
 		int onParentVersion = onParentVersionIsUnset ? OnParentVersionAction.COPY : itemDefinition.getOnParentVersion();
-		this.setOnParentVersion(OnParentVersionAction.nameFromValue(onParentVersion));
-		this.setProtected(itemDefinition.isProtected());
+		String onParentVersionAction = OnParentVersionAction.nameFromValue(onParentVersion);
+		if (!"COPY".equals(onParentVersionAction)){
+			jsonObj.put("onParentVersion", onParentVersionAction);
+		}
 	}
 	
-	public String getOnParentVersion() {
-		return onParentVersion;
+	JSONObject getJSONObject(){
+		return jsonObj;
 	}
-	public void setOnParentVersion(String onParentVersion) {
-		this.onParentVersion = onParentVersion;
-	}
-	public boolean isAutoCreated() {
-		return autoCreated;
-	}
-	public void setAutoCreated(boolean isAutoCreated) {
-		this.autoCreated = isAutoCreated;
-	}
-	public boolean isMandatory() {
-		return mandatory;
-	}
-	public void setMandatory(boolean isMandatory) {
-		this.mandatory = isMandatory;
-	}
-	public boolean isProtected() {
-		return isProtected;
-	}
-	public void setProtected(boolean isProtected) {
-		this.isProtected = isProtected;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
+	
 }

@@ -16,7 +16,6 @@
 package de.sandroboehme.jsnodetypes;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.jcr.RepositoryException;
@@ -25,41 +24,44 @@ import javax.jcr.nodetype.NodeDefinition;
 import javax.jcr.nodetype.NodeType;
 import javax.jcr.nodetype.PropertyDefinition;
 
+import org.apache.sling.commons.json.JSONArray;
+import org.apache.sling.commons.json.JSONException;
+import org.apache.sling.commons.json.JSONObject;
+
 /**
  * Represents a NodeType in JSON.
  *
  */
 public class JSONNodeType {
 
-	private boolean mixin;
-	private boolean orderableChildNodes;
-	private String[] declaredSupertypes;
-	private String primaryItemName;
-	private List<JSONPropertyDefinition> declaredPropertyDefinitions = null;
-	private List<JSONNodeDefinition> declaredChildNodeDefinitions = null;
+	private JSONObject jsonObj = new JSONObject();
 
-	public JSONNodeType(NodeType nodeType) throws ValueFormatException, RepositoryException {
-		List<JSONNodeDefinition> declaredChildNodeDefinitionList = new LinkedList<JSONNodeDefinition>();
+	public JSONNodeType(NodeType nodeType) throws ValueFormatException, RepositoryException, JSONException {
 		NodeDefinition[] declaredChildNodeDefinitions = nodeType.getDeclaredChildNodeDefinitions();
 		if (declaredChildNodeDefinitions != null) {
+			JSONArray jsonChildNodeDefArray = new JSONArray();
 			for (NodeDefinition childNodeDefinition : nodeType.getDeclaredChildNodeDefinitions()) {
 				String childNodeName = childNodeDefinition.getName();
 				if (childNodeName != null) {
 					JSONNodeDefinition jsonChildNodeDefinition = new JSONNodeDefinition(childNodeDefinition);
-					declaredChildNodeDefinitionList.add(jsonChildNodeDefinition);
+					jsonChildNodeDefArray.put(jsonChildNodeDefinition.getJSONObject());
 				}
 			}
-			this.setDeclaredChildNodeDefinitions(declaredChildNodeDefinitionList);
+			if (jsonChildNodeDefArray.length()>0){
+				jsonObj.put("declaredChildNodeDefinitions",jsonChildNodeDefArray);
+			}
 		}
 
-		List<JSONPropertyDefinition> declaredPropertyDefinitionList = new LinkedList<JSONPropertyDefinition>();
 		PropertyDefinition[] declaredPropertyDefinitions = nodeType.getDeclaredPropertyDefinitions();
 		if (declaredPropertyDefinitions != null) {
+			JSONArray jsonPropDefArray = new JSONArray();
 			for (PropertyDefinition propertyDefinition : declaredPropertyDefinitions) {
 				JSONPropertyDefinition jsonPropertyDefinition = new JSONPropertyDefinition(propertyDefinition);
-				declaredPropertyDefinitionList.add(jsonPropertyDefinition);
+				jsonPropDefArray.put(jsonPropertyDefinition.getJSONObject());
 			}
-			this.setDeclaredPropertyDefinitions(declaredPropertyDefinitionList);
+			if (jsonPropDefArray.length()>0){
+				jsonObj.put("declaredPropertyDefinitions",jsonPropDefArray);
+			}
 		}
 
 		NodeType[] superTypes = nodeType.getDeclaredSupertypes();
@@ -67,61 +69,23 @@ public class JSONNodeType {
 		for (NodeType superType : superTypes) {
 			superTypeNames.add(superType.getName());
 		}
-		this.setDeclaredSupertypes(superTypeNames.toArray(new String[superTypeNames.size()]));
-		this.setMixin(nodeType.isMixin());
-		this.setOrderableChildNodes(nodeType.hasOrderableChildNodes());
-		this.setPrimaryItemName(nodeType.getPrimaryItemName());
+		if (superTypeNames.size()>0 && !("nt:base".equals(superTypeNames.get(0)) && superTypeNames.size()==1)){
+			jsonObj.put("declaredSupertypes", new JSONArray(superTypeNames));
+		}
+		if (nodeType.isMixin()){
+			jsonObj.put("mixin", true);
+		}
+		if (nodeType.hasOrderableChildNodes()){
+			jsonObj.put("orderableChildNodes", true);
+		}
+		String thePrimaryItemName = nodeType.getPrimaryItemName();
+		if (thePrimaryItemName != null && !thePrimaryItemName.equals("")){
+			jsonObj.put("primaryItemName", nodeType.getPrimaryItemName());
+		}
 	}
-
-	public JSONNodeType() {
-	}
-
-	public boolean isMixin() {
-		return mixin;
-	}
-
-	public void setMixin(boolean isMixin) {
-		this.mixin = isMixin;
-	}
-
-	public boolean hasOrderableChildNodes() {
-		return orderableChildNodes;
-	}
-
-	public void setOrderableChildNodes(boolean orderableChildNodes) {
-		this.orderableChildNodes = orderableChildNodes;
-	}
-
-	public String getPrimaryItemName() {
-		return primaryItemName;
-	}
-
-	public void setPrimaryItemName(String primaryItemName) {
-		this.primaryItemName = primaryItemName;
-	}
-
-	public List<JSONPropertyDefinition> getDeclaredPropertyDefinitions() {
-		return declaredPropertyDefinitions;
-	}
-
-	public void setDeclaredPropertyDefinitions(List<JSONPropertyDefinition> declaredPropertyDefinitions) {
-		this.declaredPropertyDefinitions = declaredPropertyDefinitions;
-	}
-
-	public List<JSONNodeDefinition> getDeclaredChildNodeDefinitions() {
-		return declaredChildNodeDefinitions;
-	}
-
-	public void setDeclaredChildNodeDefinitions(List<JSONNodeDefinition> declaredChildNodeDefinitions) {
-		this.declaredChildNodeDefinitions = declaredChildNodeDefinitions;
-	}
-
-	public String[] getDeclaredSupertypes() {
-		return declaredSupertypes;
-	}
-
-	public void setDeclaredSupertypes(String[] declaredSupertypes) {
-		this.declaredSupertypes = declaredSupertypes;
+	
+	JSONObject getJson(){
+		return jsonObj;
 	}
 
 }
