@@ -342,7 +342,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 							var requiredPrimaryTypes = childNodeDef.requiredPrimaryTypes;
 					        for(var requiredPrimaryTypeIndex=0; requiredPrimaryTypeIndex<requiredPrimaryTypes.length && !canAddNodeType; requiredPrimaryTypeIndex++){
 								var requiredPrimaryType = requiredPrimaryTypes[requiredPrimaryTypeIndex];
-								canAddNodeType = canAddNodeType || (requiredPrimaryType === currentNodeType.name || "undefined" === requiredPrimaryType);
+								canAddNodeType = canAddNodeType || ((currentNodeType != null && requiredPrimaryType === currentNodeType.name) || "undefined" === requiredPrimaryType);
 							}
 						});
 					} 
