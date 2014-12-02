@@ -23,7 +23,7 @@
 	<groupId>de.sandroboehme</groupId>
 	<artifactId>de.sandroboehme.jsnodetypes</artifactId>
 	<packaging>bundle</packaging>
-	<version>3.0.0</version>
+	<version>3.0.1-SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
