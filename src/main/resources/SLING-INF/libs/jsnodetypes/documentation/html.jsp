@@ -132,6 +132,15 @@ function canAddChildNode(){
 		document.getElementById("ntMethodResult").innerHTML=canAddChildNode;
 	}
 }
+function canAddProperty(){
+	var ntJson = getNTJson();
+	if (ntJson != null){
+		var propertyName = document.getElementById("propertyName").value;
+		var propertyType = document.getElementById("propertyType").value;
+		var canAddProperty = ntJson.canAddProperty(propertyName, propertyType);
+		document.getElementById("ntMethodResult").innerHTML=canAddProperty;
+	}
+}
 </script>
 
 </head>
@@ -171,7 +180,11 @@ function canAddChildNode(){
 			<li><input type="button" value="canAddChildNode" onclick="canAddChildNode();"/>
 					(<input type="text" value="nodeName" id="nodeName" class="parameter"/>,
 					<span style="display:inline-block" class="parameter">ntManager.getNodeType(<input type="select" value="nodeTypeToAdd" id="nodeTypeToAdd" class="parameter"/>)</span>);
-				<span class="doc"><br>That method returns `true` if a node with the specified node name and node type can be added as a child node of the current node type. The `undefined` requiredTypes and residual definitions are considered.<br/>The <strong>first parameter is the string</strong> of the node name and the <strong>second parameter is a node type object</strong> (not a string).</span>
+				<span class="doc"><br>That method returns `true` if a node with the specified node name and node type can be added as a child node of the current node type. The residual definitions and subtypes are considered.<br/>The <strong>first parameter is the string</strong> of the node name and the <strong>second parameter is a node type object</strong> (not a string).</span>
+			</li>
+			<li><input type="button" value="canAddProperty" onclick="canAddProperty();"/>
+					(<input type="text" value="propertyName" id="propertyName" class="parameter"/>, <input type="text" value="propertyType" id="propertyType" class="parameter"/>);
+				<span class="doc"><br>That method returns `true` if a property with the specified name and type can be to the current node type. The residual definitions and undefined types are considered.<br/>The <strong>first parameter is the string</strong> of the property name and the <strong>second parameter is the property type</strong> (case insensitive).</span>
 			</li>
 			<li>
 				<input type="button" value="getApplicableChildNodeTypes();" onclick="loadApplicableChildNodeTypes();"/>
@@ -224,7 +237,13 @@ var canAddChildNode = firstNodeType.canAddChildNode("myNodeName", nodeTypesArray
 		</ol>
 		<h2>Version History</h2>
 		<ul>
-			<li><strong>3.1</strong>
+			<li><strong>3.0.2</strong>
+				<ul>
+					<li>Fixed canAddChildNode() to check node name and node type combination and to return 'true' also for subtypes of a requiredPrimaryType.</li>
+					<li>Added canAddProperty()</li>
+				</ul>
+			</li>
+			<li><strong>3.0.1</strong>
 				<ul>
 					<li>canAddChildNode(): checking if the provided node type is null</li>
 				</ul>

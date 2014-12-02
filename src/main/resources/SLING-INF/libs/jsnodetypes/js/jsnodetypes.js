@@ -276,6 +276,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 				var allCollectedChildNodeDefs = [];
 				var allCollectedChildNodeDefHashes = [];
 				processNodeTypeGraph.call(that, that.nodeTypesJson[name], 'declaredSupertypes', function(currentNodeType){
+					if (currentNodeType.declaredChildNodeDefinitions == null) return;
 					for (var childNodeDefIndex in currentNodeType.declaredChildNodeDefinitions) {
 						var childNodeDef = currentNodeType.declaredChildNodeDefinitions[childNodeDefIndex];
 						var childNodeDefName = childNodeDef.name;
@@ -298,6 +299,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 				var allCollectedPropertyDefs = [];
 				var allCollectedPropertyDefHashes = [];
 				processNodeTypeGraph.call(that, that.nodeTypesJson[name], 'declaredSupertypes', function(currentNodeType){
+					if (currentNodeType.declaredPropertyDefinitions == null) return;
 					for (var propertyDefIndex in currentNodeType.declaredPropertyDefinitions) {
 						var propertyDef = currentNodeType.declaredPropertyDefinitions[propertyDefIndex];
 						var propertyDefName = propertyDef.name;
@@ -315,7 +317,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 
 			/*
 			 * Returns `true` if a node with the specified node name and node type can be added as a child node of the current node type. 
-			 * The `undefined` requiredTypes and residual definitions are considered.
+			 * The residual definitions are considered.
 			 * 
 			 * The first parameter is the string of the node name and 
 			 * the second parameter is a node type object (not a string).
@@ -335,6 +337,29 @@ de.sandroboehme.NodeTypeManager = (function() {
 				return false;
 			};
 
+			/*
+			 * Returns `true` if a property with the specified name and type can be to the current node type. 
+			 * The residual definitions, undefined types are considered.
+			 * 
+			 * The first parameter is the string of the property name and 
+			 * the second parameter is the property type (case insensitive).
+			 */
+			this.nodeTypesJson[name].canAddProperty = function(propertyName, propertyType){
+				if (propertyName == null || propertyType == null) return false;
+				var canAddProperty = false;
+				processNodeTypeGraph.call(that, that.nodeTypesJson[name], 'declaredSupertypes', function(currentNodeType){
+					if (currentNodeType.declaredPropertyDefinitions == null) return;
+				    for (var propDefIndex=0; canAddProperty === false && propDefIndex < currentNodeType.declaredPropertyDefinitions.length; propDefIndex++) {
+						var propDef = currentNodeType.declaredPropertyDefinitions[propDefIndex];
+						var namesMatch = propDef.name === propertyName || "*" === propDef.name;
+						var typesMatch = propDef.requiredType.toLowerCase() === propertyType.toLowerCase() || "undefined" === propDef.requiredType;
+						var isNotProtected = !propDef.protected;
+						canAddProperty = namesMatch && typesMatch && isNotProtected; 
+				    }
+				}); 
+				return canAddProperty;
+			};
+			
 			/*
 			 * Returns all node types that can be used for child nodes of this node type and its super types.
 			 * If a child node definition specifies multiple required primary types an applicable node type has

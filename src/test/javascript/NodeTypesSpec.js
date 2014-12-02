@@ -893,6 +893,65 @@ describe('The Node Type Manager', function() {
 			});
 		});
 	});
+
+	describe('checks in canAddProperty()', function () {
+
+		var settings = {
+				"defaultNTJsonURL": defaultNTJsonURL,
+				"nodeTypesJson" : {
+					"aParentNodeType" : {
+						"declaredPropertyDefinitions" : [{
+							"name" : "propertyDef5",
+						    "requiredType": "String"
+						},{
+							"name" : "propertyDef4",
+						    "requiredType": "Date",
+						    "protected": true
+						},{
+							"name" : "*",
+						    "requiredType": "String"
+						},{
+							"name" : "propertyDef2",
+					        "requiredType": "undefined"
+						}]
+					},		
+					"aNodeType" : {
+						"declaredSupertypes" : [ "aParentNodeType" ],
+						"declaredPropertyDefinitions" : [{
+							"name" : "propertyDef1",
+				        	"requiredType": "String"
+						}]
+					}
+				}
+		};
+		
+		var ntManager = new de.sandroboehme.NodeTypeManager(settings);
+		
+		describe('if the name and type is applicable', function() {
+			it('for residual property names', function() {
+				expect(ntManager.getNodeType("aNodeType").canAddProperty("aPropertyDef", "String")).toBe(true);
+				expect(ntManager.getNodeType("aNodeType").canAddProperty("aPropertyDef", "Binary")).toBe(false);
+			});
+			it('for undefined property types', function() {
+				expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef2", "Binary")).toBe(true);
+				expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef2", "Date")).toBe(true);
+			});
+			it('for non residual property names', function() {
+				expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef1", "String")).toBe(true);
+				expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef1", "Binary")).toBe(false);
+			});
+			it('for properties of super types', function() {
+				expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef5", "String")).toBe(true);
+				expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef5", "Binary")).toBe(false);
+			});
+		});
+		it('if the type is case insensitive', function() {
+			expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef1", "stRING")).toBe(true);
+		});
+		it('if the name and type is not applicable for protected properties', function() {
+			expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef4", "Date")).toBe(false);
+		});
+	});
 	
 	function sameArrayContent(array1, array2){
 		expect(array1.length).toBe(array2.length); 
