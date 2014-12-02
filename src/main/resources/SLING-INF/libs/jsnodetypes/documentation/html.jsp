@@ -222,8 +222,13 @@ var canAddChildNode = firstNodeType.canAddChildNode("myNodeName", nodeTypesArray
 			<li>At <pre>/libs/jsnodetypes/content/documentation.html</pre> you should be able to see and use this page.</li> 
 			<li>If you see the page: Congrats you successfully installed the jsNodeTypes library! In case you don't see it, please have a look at the next section to get it installed.</li> 
 		</ol>
-		<h2>Changes</h2>
+		<h2>Version History</h2>
 		<ul>
+			<li><strong>3.1</strong>
+				<ul>
+					<li>canAddChildNode(): checking if the provided node type is null</li>
+				</ul>
+			</li>
 			<li><strong>3.0</strong>
 				<ul>
 					<li>Rework of almost all of the runtime source code to remove the Google Gson dependency and use the sling.commons.json dependency instead as the latter it is already part of the Sling launchpad and Gson is not.</li>
