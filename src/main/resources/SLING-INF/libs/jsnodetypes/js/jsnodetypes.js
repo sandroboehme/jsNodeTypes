@@ -175,6 +175,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 	 * iterationProperty - the property of the nodeType that should be used for iteration e.g. 'declaredSupertypes'
 	 */
 	function processNodeTypeGraph (currentNodeType, iterationProperty, processingFunction, processedNodeTypes){
+		if (currentNodeType == null || iterationProperty == null || iterationProperty==="" || processingFunction == null ) return;
 		var initialCall = typeof processedNodeTypes === 'undefined';
 		if (initialCall){
 			processedNodeTypes = [];
@@ -320,35 +321,18 @@ de.sandroboehme.NodeTypeManager = (function() {
 			 * the second parameter is a node type object (not a string).
 			 */
 			this.nodeTypesJson[name].canAddChildNode = function(nodeName, nodeTypeToAdd){
-				if (nodeTypeToAdd==null) return false;
-				var allChildNodeDefs = this.getAllChildNodeDefinitions();
-				var canAddChildNode = canAddByChildNodeName(allChildNodeDefs);
-				canAddChildNode = canAddChildNode && canAddNodeType(allChildNodeDefs, nodeTypeToAdd);
-				return canAddChildNode;
-				
-				function canAddByChildNodeName(allChildNodeDefs){
-					var canAddChildNode=false;
-					for (var childNodeDefIndex in allChildNodeDefs){
-						var childNodeDef = allChildNodeDefs[childNodeDefIndex];
-						canAddChildNode = canAddChildNode || ((childNodeDef.name === nodeName || "*" === childNodeDef.name) && childNodeDef.protected===false);
+				if (nodeTypeToAdd==null || nodeName==null) return false;
+				var appliCnTypes = that.nodeTypesJson[name].getApplicableChildNodeTypes();
+				if (appliCnTypes[nodeName] != null){
+					if (appliCnTypes[nodeName][nodeTypeToAdd.name] != null){
+						return !appliCnTypes[nodeName][nodeTypeToAdd.name].protected
 					}
-					return canAddChildNode;
+				} else if (appliCnTypes["*"] != null){
+					if (appliCnTypes["*"][nodeTypeToAdd.name] != null){
+						return !appliCnTypes["*"][nodeTypeToAdd.name].protected
+					}
 				}
-				function canAddNodeType(allChildNodeDefs, nodeTypeToAdd){
-					var canAddNodeType;
-			        for(var i=0; i<allChildNodeDefs.length && !canAddNodeType; i++){
-						var childNodeDef = allChildNodeDefs[i];
-						processNodeTypeGraph.call(that, nodeTypeToAdd, 'declaredSupertypes', function(currentNodeType){
-							// currentNodeType is the specified node type or one of its super types
-							var requiredPrimaryTypes = childNodeDef.requiredPrimaryTypes;
-					        for(var requiredPrimaryTypeIndex=0; requiredPrimaryTypeIndex<requiredPrimaryTypes.length && !canAddNodeType; requiredPrimaryTypeIndex++){
-								var requiredPrimaryType = requiredPrimaryTypes[requiredPrimaryTypeIndex];
-								canAddNodeType = canAddNodeType || ((currentNodeType != null && requiredPrimaryType === currentNodeType.name) || "undefined" === requiredPrimaryType);
-							}
-						});
-					} 
-					return canAddNodeType;
-				}
+				return false;
 			};
 
 			/*

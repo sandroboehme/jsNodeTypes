@@ -824,17 +824,7 @@ describe('The Node Type Manager', function() {
 					    "declaredChildNodeDefinitions": [
 					      {
 					        "requiredPrimaryTypes": [
-					          "otherNodeType", "unknownNodeType"
-					        ],
-					    	"name" : "*"
-					      }
-					    ]
-					  },
-					"ntWithUndefinedChildNode": {
-					    "declaredChildNodeDefinitions": [
-					      {
-					        "requiredPrimaryTypes": [
-					          "undefined"
+					          "otherNodeType"
 					        ],
 					    	"name" : "*"
 					      }
@@ -846,8 +836,25 @@ describe('The Node Type Manager', function() {
 					},
 					"inheritedNodeType" : {
 					    "declaredSupertypes": [
-						 					      "otherNodeType"
-						 					    ]
+ 					      "otherNodeType"
+ 					    ]
+					},
+					"aNodeType" : {
+					    "declaredChildNodeDefinitions": [
+					      {
+					        "requiredPrimaryTypes": [
+					          "aChildNodeType"
+					        ],
+					    	"name" : "*"
+					      }
+					    ]
+					},
+					"aChildNodeType" : {
+					},
+					"aChildNodesSubtype" : {
+					    "declaredSupertypes": [
+ 					      "aChildNodeType"
+ 					    ]
 					}
 			}
 		};
@@ -878,9 +885,11 @@ describe('The Node Type Manager', function() {
 				expect(ntManager.getNodeType("ntWithOtherChildNode").canAddChildNode("inheritedNodeType", inheritedNodeType)).toBe(true);
 				expect(ntManager.getNodeType("ntWithOtherChildNode").canAddChildNode("inheritedNodeType", ntBase)).toBe(false);
 			});
-			it('for an undefined type', function() {
-				var otherNodeType = ntManager.getNodeType("otherNodeType");
-				expect(ntManager.getNodeType("ntWithUndefinedChildNode").canAddChildNode("otherNodeType", otherNodeType)).toBe(true);
+			it('for subtype', function() {
+				var aChildNodeType = ntManager.getNodeType("aChildNodeType");
+				var aChildNodesSubtype = ntManager.getNodeType("aChildNodesSubtype");
+				expect(ntManager.getNodeType("aNodeType").canAddChildNode("aNodeName", aChildNodeType)).toBe(true);
+				expect(ntManager.getNodeType("aNodeType").canAddChildNode("aNodeName", aChildNodesSubtype)).toBe(true);
 			});
 		});
 	});
