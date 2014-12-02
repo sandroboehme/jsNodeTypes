@@ -320,6 +320,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 			 * the second parameter is a node type object (not a string).
 			 */
 			this.nodeTypesJson[name].canAddChildNode = function(nodeName, nodeTypeToAdd){
+				if (nodeTypeToAdd==null) return false;
 				var allChildNodeDefs = this.getAllChildNodeDefinitions();
 				var canAddChildNode = canAddByChildNodeName(allChildNodeDefs);
 				canAddChildNode = canAddChildNode && canAddNodeType(allChildNodeDefs, nodeTypeToAdd);
