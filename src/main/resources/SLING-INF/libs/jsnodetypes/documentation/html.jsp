@@ -241,6 +241,7 @@ var canAddChildNode = firstNodeType.canAddChildNode("myNodeName", nodeTypesArray
 				<ul>
 					<li>Fixed canAddChildNode() to check node name and node type combination and to return 'true' also for subtypes of a requiredPrimaryType.</li>
 					<li>Added canAddProperty()</li>
+					<li>Fixed canAddChildNode() to handle the protected property correctly</li>
 				</ul>
 			</li>
 			<li><strong>3.0.1</strong>
