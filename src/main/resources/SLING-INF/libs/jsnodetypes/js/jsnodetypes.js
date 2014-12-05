@@ -349,14 +349,20 @@ de.sandroboehme.NodeTypeManager = (function() {
 				 * Returns all node types that can be used for child nodes of this node type and its super types.
 				 * If a child node definition specifies multiple required primary types an applicable node type has
 				 * to be a subtype of all of them. 
+				 * The parameter is a boolean that specifies if mixins should be included or not. If no parameter is passed 'true' is assumed and mixins are
+				 * returned as well.
 				 */
-				that.nodeTypesJson[nodeTypeName].getApplicableChildNodeTypes = function(){
+				that.nodeTypesJson[nodeTypeName].getApplicableChildNodeTypes = function(includeMixins){
 					var allApplChildNodeTypes = {};
 					processApplicableChildNodeTypes(that, this, function(cnDef, nodeTypeName){
+						var nodeType = that.getNodeType(nodeTypeName);
 						if (typeof allApplChildNodeTypes[cnDef.name] === "undefined") {
 							allApplChildNodeTypes[cnDef.name] = {};
 						}
-						allApplChildNodeTypes[cnDef.name][nodeTypeName] = that.getNodeType(nodeTypeName);	
+						var includeAlsoMixins = typeof includeMixins === "undefined" || includeMixins;
+						if (nodeType.mixin === true && includeAlsoMixins || !nodeType.mixin){
+							allApplChildNodeTypes[cnDef.name][nodeTypeName] = that.getNodeType(nodeTypeName);
+						}
 					});
 					/*
 					 * Residual definitions are also applicable to child node definitions that are specified

@@ -616,6 +616,12 @@ describe('The Node Type Manager', function() {
 						  		"supCnDef2Sub1"
 						  	]
 						},
+						"supCnDef2Mixin" : {
+						    "declaredSupertypes": [
+						  		"supCnDef2Sub11"
+						  	],
+						  	"mixin": true
+						},
 						"supCnDef3": {
 						},
 						"supCnDef3Def2" : {
@@ -711,6 +717,12 @@ describe('The Node Type Manager', function() {
 						  		"cnDef2Sub2"
 						  	]
 						},
+						"CnDef2Mixin" : {
+						    "declaredSupertypes": [
+						  		"cnDef5Sub2"
+						  	],
+						  	"mixin": true
+						},
 						"cnDef45" : {
 						    "declaredSupertypes": [
 						  		"cnDef4Sub11",
@@ -744,7 +756,7 @@ describe('The Node Type Manager', function() {
 				expect(applicableCnTypes["cnDef1Name"]["cnDef45Sub1"]).toBeDefined();
 	
 				expect(applicableCnTypes["cnDef2Name"]).toBeDefined();
-				expect(Object.keySize(applicableCnTypes["cnDef2Name"])).toBe(11);
+				expect(Object.keySize(applicableCnTypes["cnDef2Name"])).toBe(12);
 				expect(applicableCnTypes["cnDef2Name"]["cnDef2"]).toBeDefined();
 				expect(applicableCnTypes["cnDef2Name"]["cnDef3"]).toBeDefined();
 				expect(applicableCnTypes["cnDef2Name"]["cnDef2Sub1"]).toBeDefined();
@@ -756,6 +768,7 @@ describe('The Node Type Manager', function() {
 				expect(applicableCnTypes["cnDef2Name"]["cnDef45"]).toBeDefined();
 				expect(applicableCnTypes["cnDef2Name"]["cnDef45Sub1"]).toBeDefined();
 				expect(applicableCnTypes["cnDef2Name"]["supCnDef3Def2"]).toBeDefined();
+				expect(applicableCnTypes["cnDef2Name"]["CnDef2Mixin"]).toBeDefined();
 				
 				expect(applicableCnTypes["*"]).toBeDefined();
 				expect(Object.keySize(applicableCnTypes["*"])).toBe(4);
@@ -867,6 +880,92 @@ describe('The Node Type Manager', function() {
 			
 			expect(applicableCnTypes["*"]["cnType2"]).toBeDefined(true);
 			expect(Object.keySize(applicableCnTypes["*"])).toBe(1);
+		});
+
+		it('the applicable mixin node types if \'true\' has been passed to the mixin parameter', function () {
+			var settings = {
+					"defaultNTJsonURL": defaultNTJsonURL,
+					"nodeTypesJson" : {
+						"nt:base" : {
+						},
+						"aNodeType" : {
+	 					    "declaredChildNodeDefinitions": [{
+  						    	 "requiredPrimaryTypes": [
+	   						    	     "cnType1"
+	   						    	 ],
+	   						      	 "name" : "cnDef1Name"
+		   						  },{
+	   						    	 "requiredPrimaryTypes": [
+	   						    	     "cnType2"
+	   						    	 ],
+	   						      	 "name" : "cnDef2Name"
+		   						 },{
+   						    	 "requiredPrimaryTypes": [
+	   						    	     "cnType3"
+	   						    	 ],
+	   						      	 "name" : "cnDef3Name"
+		   						 },{
+							     "requiredPrimaryTypes": [
+							    	  "cnType4"
+							     ],
+							     "name" : "*"
+							 }
+						    ]
+						},
+						"cnType1" : {
+						},
+						"cnType2" : {
+						    "mixin": true
+						},
+						"cnType3" : {
+							"mixin": true
+						},
+						"cnType4" : {
+						}
+					}
+			};
+	
+			var ntManager = new de.sandroboehme.NodeTypeManager(settings);
+			var applicableCnTypesWithMixin = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypes(true);
+
+			expect(applicableCnTypesWithMixin!=null).toBe(true);
+			expect(applicableCnTypesWithMixin["cnDef1Name"]).toBeDefined(true);
+			expect(applicableCnTypesWithMixin["cnDef1Name"]["cnType1"]).toBeDefined(true);
+			expect(applicableCnTypesWithMixin["cnDef1Name"]["cnType4"]).toBeDefined(true);
+			expect(Object.keySize(applicableCnTypesWithMixin["cnDef1Name"])).toBe(2);
+			
+			expect(applicableCnTypesWithMixin["cnDef2Name"]).toBeDefined(true);
+			expect(applicableCnTypesWithMixin["cnDef2Name"]["cnType2"]).toBeDefined(true);
+			expect(applicableCnTypesWithMixin["cnDef2Name"]["cnType4"]).toBeDefined(true);
+			expect(Object.keySize(applicableCnTypesWithMixin["cnDef1Name"])).toBe(2);
+			
+			expect(applicableCnTypesWithMixin["cnDef3Name"]).toBeDefined(true);
+			expect(applicableCnTypesWithMixin["cnDef3Name"]["cnType3"]).toBeDefined(true);
+			expect(applicableCnTypesWithMixin["cnDef3Name"]["cnType4"]).toBeDefined(true);
+			expect(Object.keySize(applicableCnTypesWithMixin["cnDef1Name"])).toBe(2);
+			
+			expect(applicableCnTypesWithMixin["*"]["cnType4"]).toBeDefined(true);
+			expect(Object.keySize(applicableCnTypesWithMixin["*"])).toBe(1);
+			
+
+			var applicableCnTypesWithoutMixin = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypes(false);
+
+			expect(applicableCnTypesWithoutMixin!=null).toBe(true);
+			expect(applicableCnTypesWithoutMixin["cnDef1Name"]).toBeDefined(true);
+			expect(applicableCnTypesWithoutMixin["cnDef1Name"]["cnType1"]).toBeDefined(true);
+			expect(applicableCnTypesWithoutMixin["cnDef1Name"]["cnType4"]).toBeDefined(true);
+			expect(Object.keySize(applicableCnTypesWithoutMixin["cnDef1Name"])).toBe(2);
+			
+			expect(applicableCnTypesWithoutMixin["cnDef2Name"]).toBeDefined(true);
+			expect(applicableCnTypesWithoutMixin["cnDef2Name"]["cnType4"]).toBeDefined(true);
+			expect(Object.keySize(applicableCnTypesWithoutMixin["cnDef2Name"])).toBe(1);
+			
+			expect(applicableCnTypesWithoutMixin["cnDef3Name"]).toBeDefined(true);
+			expect(applicableCnTypesWithoutMixin["cnDef3Name"]["cnType4"]).toBeDefined(true);
+			expect(Object.keySize(applicableCnTypesWithoutMixin["cnDef3Name"])).toBe(1);
+			
+			expect(applicableCnTypesWithoutMixin["*"]["cnType4"]).toBeDefined(true);
+			expect(Object.keySize(applicableCnTypesWithoutMixin["*"])).toBe(1);
 		});
 	});
 

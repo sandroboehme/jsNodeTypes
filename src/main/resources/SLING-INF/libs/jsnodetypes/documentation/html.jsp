@@ -71,7 +71,7 @@ input {
 	margin-bottom: 15px;
 }
 .parameter {
-	margin-left: 40px;
+	margin-left: 10px;
 }
 
 </style>
@@ -119,7 +119,8 @@ function loadPropertyDefs(){
 function loadApplicableChildNodeTypes(){
 	var ntJson = getNTJson();
 	if (ntJson != null){
-		var applicableChildNodeTypes = ntJson.getApplicableChildNodeTypes();
+		var includeMixins = document.getElementById("includeMixins").checked;
+		var applicableChildNodeTypes = ntJson.getApplicableChildNodeTypes(includeMixins);
 		document.getElementById("ntMethodResult").innerHTML=JSON.stringify(applicableChildNodeTypes, null, 4);
 	}
 };
@@ -187,8 +188,9 @@ function canAddProperty(){
 				<span class="doc"><br>That method returns `true` if a property with the specified name and type can be to the current node type. The residual definitions and undefined types are considered.<br/>The <strong>first parameter is the string</strong> of the property name and the <strong>second parameter is the property type</strong> (case insensitive).</span>
 			</li>
 			<li>
-				<input type="button" value="getApplicableChildNodeTypes();" onclick="loadApplicableChildNodeTypes();"/>
-				<span class="doc">Returns all node types that can be used for child nodes of this node type and its super types.<br/>If a child node definition specifies multiple required primary types, only node types that are subtypes of all of them are applicable.</br>The keys on the first level are the names of the child node definitions. Its values / the keys on the second level contain the node type names and its values in turn contain the node type definition itself.</span>
+				<input type="button" value="getApplicableChildNodeTypes()" onclick="loadApplicableChildNodeTypes();"/>
+					(<input type="checkbox" value="includeMixins" id="includeMixins" class="parameter"/> includeMixins);
+				<span class="doc"><br>Returns all node types that can be used for child nodes of this node type and its super types.<br/>If a child node definition specifies multiple required primary types, only node types that are subtypes of all of them are applicable.</br>The keys on the first level are the names of the child node definitions. Its values / the keys on the second level contain the node type names and its values in turn contain the node type definition itself. The <strong>parameter is a boolean</strong> and specifies if mixin types should be included in the result.</span>
 			</li>
 		</ul>
 		<div class="code">
@@ -242,6 +244,7 @@ var canAddChildNode = firstNodeType.canAddChildNode("myNodeName", nodeTypesArray
 					<li>Fixed canAddChildNode() to check node name and node type combination and to return 'true' also for subtypes of a requiredPrimaryType.</li>
 					<li>Fixed canAddChildNode() to handle the protected property correctly</li>
 					<li>Fixed getApplicableChildNodeTypes() to add the node types of the residual node definitions also to the non residual definitions</li>   
+					<li>Added includeMixins parameter to getApplicableChildNodeTypes()</li>
 					<li>Added canAddProperty()</li>
 				</ul>
 			</li>
