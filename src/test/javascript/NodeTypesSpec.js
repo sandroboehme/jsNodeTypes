@@ -736,12 +736,17 @@ describe('The Node Type Manager', function() {
 				expect(applicableCnTypes).toBeDefined();
 				
 				expect(applicableCnTypes["cnDef1Name"]).toBeDefined();
-				expect(Object.keySize(applicableCnTypes["cnDef1Name"])).toBe(1);
+				expect(Object.keySize(applicableCnTypes["cnDef1Name"])).toBe(5);
 				expect(applicableCnTypes["cnDef1Name"]["cnDef1"]).toBeDefined();
+				expect(applicableCnTypes["cnDef1Name"]["supCnDef3Def2"]).toBeDefined();
+				expect(applicableCnTypes["cnDef1Name"]["cnDef3"]).toBeDefined();
+				expect(applicableCnTypes["cnDef1Name"]["cnDef45"]).toBeDefined();
+				expect(applicableCnTypes["cnDef1Name"]["cnDef45Sub1"]).toBeDefined();
 	
 				expect(applicableCnTypes["cnDef2Name"]).toBeDefined();
-				expect(Object.keySize(applicableCnTypes["cnDef2Name"])).toBe(9);
+				expect(Object.keySize(applicableCnTypes["cnDef2Name"])).toBe(11);
 				expect(applicableCnTypes["cnDef2Name"]["cnDef2"]).toBeDefined();
+				expect(applicableCnTypes["cnDef2Name"]["cnDef3"]).toBeDefined();
 				expect(applicableCnTypes["cnDef2Name"]["cnDef2Sub1"]).toBeDefined();
 				expect(applicableCnTypes["cnDef2Name"]["cnDef2Sub11"]).toBeDefined();
 				expect(applicableCnTypes["cnDef2Name"]["cnDef2Sub2"]).toBeDefined();
@@ -750,6 +755,7 @@ describe('The Node Type Manager', function() {
 				expect(applicableCnTypes["cnDef2Name"]["cnDef5Sub2"]).toBeDefined();
 				expect(applicableCnTypes["cnDef2Name"]["cnDef45"]).toBeDefined();
 				expect(applicableCnTypes["cnDef2Name"]["cnDef45Sub1"]).toBeDefined();
+				expect(applicableCnTypes["cnDef2Name"]["supCnDef3Def2"]).toBeDefined();
 				
 				expect(applicableCnTypes["*"]).toBeDefined();
 				expect(Object.keySize(applicableCnTypes["*"])).toBe(4);
@@ -761,9 +767,14 @@ describe('The Node Type Manager', function() {
 				expect(applicableCnTypes["*"]["cnDef45Sub1"]).toBeDefined();
 	
 				expect(applicableCnTypes["supCnDef1Name"]).toBeDefined();
-				expect(Object.keySize(applicableCnTypes["supCnDef1Name"])).toBe(3);
+				expect(Object.keySize(applicableCnTypes["supCnDef1Name"])).toBe(7);
+				expect(applicableCnTypes["supCnDef1Name"]["supCnDef1"]).toBeDefined();
 				expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub1"]).toBeDefined();
 				expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub11"]).toBeDefined();
+				expect(applicableCnTypes["supCnDef1Name"]["supCnDef3Def2"]).toBeDefined();
+				expect(applicableCnTypes["supCnDef1Name"]["cnDef3"]).toBeDefined();
+				expect(applicableCnTypes["supCnDef1Name"]["cnDef45"]).toBeDefined();
+				expect(applicableCnTypes["supCnDef1Name"]["cnDef45Sub1"]).toBeDefined();
 			});
 			
 			it('with multiple requiredPrimaryTypes', function() {
@@ -781,8 +792,8 @@ describe('The Node Type Manager', function() {
 				expect(applicableCnTypes["supCnDef1Name"]["supCnDef1Sub11"]).toBeDefined();
 				
 				expect(applicableCnTypes["*"]["supCnDef3Def2"]).toBeDefined();
-	
 			});
+
 		});
 		describe('all node types', function () {
 			var settings = {
@@ -805,9 +816,6 @@ describe('The Node Type Manager', function() {
 					}
 			};
 	
-			// see "/src/test/resources/applicableChildNodeTypesDatastructure.jpg" for a
-			// visualization of the test datastructure
-			
 			var ntManager = new de.sandroboehme.NodeTypeManager(settings);
 			var applicableCnTypes = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypes();
 
@@ -818,7 +826,47 @@ describe('The Node Type Manager', function() {
 				expect(applicableCnTypes["cnDef1Name"]["aNodeType"]).toBeDefined(true);
 				expect(applicableCnTypes["cnDef1Name"]["nt1"]).toBeDefined(true);
 				expect(applicableCnTypes["cnDef1Name"]["nt2"]).toBeDefined(true);
+				expect(Object.keySize(applicableCnTypes["cnDef1Name"])).toBe(4);
 			});
+		});
+		it('the node types of the named definitions that include the node types of the residual definition', function () {
+			var settings = {
+					"defaultNTJsonURL": defaultNTJsonURL,
+					"nodeTypesJson" : {
+						"nt:base" : {
+						},
+						"aNodeType" : {
+	 					    "declaredChildNodeDefinitions": [{
+   						    	 "requiredPrimaryTypes": [
+   						    	     "cnType1"
+   						    	 ],
+   						      	 "name" : "cnDef1Name"
+	   						 },{
+							     "requiredPrimaryTypes": [
+							    	  "cnType2"
+							     ],
+							     "name" : "*"
+							 }
+						    ]
+						},
+						"cnType1" : {
+						},
+						"cnType2" : {
+						}
+					}
+			};
+	
+			var ntManager = new de.sandroboehme.NodeTypeManager(settings);
+			var applicableCnTypes = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypes();
+
+			expect(applicableCnTypes!=null).toBe(true);
+			expect(applicableCnTypes["cnDef1Name"]).toBeDefined(true);
+			expect(applicableCnTypes["cnDef1Name"]["cnType1"]).toBeDefined(true);
+			expect(applicableCnTypes["cnDef1Name"]["cnType2"]).toBeDefined(true);
+			expect(Object.keySize(applicableCnTypes["cnDef1Name"])).toBe(2);
+			
+			expect(applicableCnTypes["*"]["cnType2"]).toBeDefined(true);
+			expect(Object.keySize(applicableCnTypes["*"])).toBe(1);
 		});
 	});
 
@@ -941,12 +989,15 @@ describe('The Node Type Manager', function() {
 					},
 					"aParentNodeType" : {
 						"declaredPropertyDefinitions" : [{
-							"name" : "propertyDef5",
-						    "requiredType": "String"
+							"name" : "propertyDef6",
+						    "requiredType": "Date"
 						},{
 							"name" : "propertyDef4",
 						    "requiredType": "Date",
 						    "protected": true
+						},{
+							"name" : "propertyDef5",
+						    "requiredType": "String"
 						},{
 							"name" : "*",
 						    "requiredType": "String"
@@ -975,6 +1026,7 @@ describe('The Node Type Manager', function() {
 			it('for undefined property types', function() {
 				expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef2", "Binary")).toBe(true);
 				expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef2", "Date")).toBe(true);
+				expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef2", "String")).toBe(true);
 			});
 			it('for non residual property names', function() {
 				expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef1", "String")).toBe(true);
@@ -990,6 +1042,10 @@ describe('The Node Type Manager', function() {
 		});
 		it('if the name and type is not applicable for protected properties', function() {
 			expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef4", "Date")).toBe(false);
+		});
+		it('if the residual property types are also available for non residual property types', function() {
+			expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef6", "Date")).toBe(true);
+			expect(ntManager.getNodeType("aNodeType").canAddProperty("propertyDef6", "String")).toBe(true);
 		});
 	});
 	

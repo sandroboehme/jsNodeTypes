@@ -300,7 +300,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 								allCollectedPropertyDefs.push(propertyDef);
 							}
 						}
-					}); 
+					});
 					return allCollectedPropertyDefs;
 				};
 	
@@ -358,6 +358,21 @@ de.sandroboehme.NodeTypeManager = (function() {
 						}
 						allApplChildNodeTypes[cnDef.name][nodeTypeName] = that.getNodeType(nodeTypeName);	
 					});
+					/*
+					 * Residual definitions are also applicable to child node definitions that are specified
+					 * by name. Thats why the types that are applicable to the residual child node definitions
+					 * are also applicable to the child node definitions specified by name. The copying of the types
+					 * is done in the following code block.
+					 */
+					if (allApplChildNodeTypes["*"] != null) {
+						for (var applChildNodeName in allApplChildNodeTypes){
+							if ("*" != applChildNodeName) {
+								for (var residualChildNodeTypeIndex in allApplChildNodeTypes["*"]){
+									allApplChildNodeTypes[applChildNodeName][residualChildNodeTypeIndex]=allApplChildNodeTypes["*"][residualChildNodeTypeIndex];
+								}
+							}
+						}
+					}
 					return allApplChildNodeTypes;
 				}
 			};

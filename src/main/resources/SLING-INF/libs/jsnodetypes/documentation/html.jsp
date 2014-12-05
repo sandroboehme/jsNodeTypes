@@ -240,8 +240,9 @@ var canAddChildNode = firstNodeType.canAddChildNode("myNodeName", nodeTypesArray
 			<li><strong>3.0.2</strong>
 				<ul>
 					<li>Fixed canAddChildNode() to check node name and node type combination and to return 'true' also for subtypes of a requiredPrimaryType.</li>
-					<li>Added canAddProperty()</li>
 					<li>Fixed canAddChildNode() to handle the protected property correctly</li>
+					<li>Fixed getApplicableChildNodeTypes() to add the node types of the residual node definitions also to the non residual definitions</li>   
+					<li>Added canAddProperty()</li>
 				</ul>
 			</li>
 			<li><strong>3.0.1</strong>
