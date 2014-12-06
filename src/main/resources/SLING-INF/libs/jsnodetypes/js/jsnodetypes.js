@@ -306,16 +306,22 @@ de.sandroboehme.NodeTypeManager = (function() {
 	
 				/*
 				 * Returns `true` if a node with the specified node name and node type can be added as a child node of the current node type. 
-				 * The residual definitions are considered.
 				 * 
 				 * The first parameter is the string of the node name and 
 				 * the second parameter is a node type object (not a string).
 				 */
 				that.nodeTypesJson[nodeTypeName].canAddChildNode = function(nodeName, nodeTypeToAdd){
 					if (nodeName==null || nodeTypeToAdd==null) return false;
+					var allChildNodeDefNames = [];
+					processApplicableChildNodeTypes(that, this, function(cnDef, nodeTypeName){
+						if (cnDef.name === nodeName) {
+							allChildNodeDefNames.push(nodeName);
+						}
+					});
 					var canAddChildNode = false;
 					processApplicableChildNodeTypes(that, this, function(cnDef, nodeTypeName){
-						var nodeNameMatches = (nodeName === cnDef.name) || "*" === cnDef.name; 
+						var noNonRisidualWithThatName = allChildNodeDefNames.indexOf(nodeName)<0;
+						var nodeNameMatches = (nodeName === cnDef.name) || ("*" === cnDef.name && noNonRisidualWithThatName); 
 						var canAddToCurrentCnDef = !cnDef.protected && nodeNameMatches && nodeTypeToAdd.name === nodeTypeName;
 						canAddChildNode = canAddChildNode || canAddToCurrentCnDef; 
 					});
@@ -324,19 +330,27 @@ de.sandroboehme.NodeTypeManager = (function() {
 	
 				/*
 				 * Returns `true` if a property with the specified name and type can be to the current node type. 
-				 * The residual definitions, undefined types are considered.
 				 * 
 				 * The first parameter is the string of the property name and 
 				 * the second parameter is the property type (case insensitive).
 				 */
 				that.nodeTypesJson[nodeTypeName].canAddProperty = function(propertyName, propertyType){
 					if (propertyName == null || propertyType == null) return false;
+					var allPropertyDefNames = [];
+					processNodeTypeGraph.call(that, this, 'declaredSupertypes', function(currentNodeType){
+						if (currentNodeType.declaredPropertyDefinitions == null) return;
+					    for (var propDefIndex in currentNodeType.declaredPropertyDefinitions) {
+							var propDef = currentNodeType.declaredPropertyDefinitions[propDefIndex];
+							allPropertyDefNames.push(propDef.name);
+					    }
+					}); 
 					var canAddProperty = false;
 					processNodeTypeGraph.call(that, this, 'declaredSupertypes', function(currentNodeType){
 						if (currentNodeType.declaredPropertyDefinitions == null) return;
 					    for (var propDefIndex=0; canAddProperty === false && propDefIndex < currentNodeType.declaredPropertyDefinitions.length; propDefIndex++) {
 							var propDef = currentNodeType.declaredPropertyDefinitions[propDefIndex];
-							var namesMatch = propDef.name === propertyName || "*" === propDef.name;
+							var noNonRisidualWithThatName = allPropertyDefNames.indexOf(propertyName)<0;
+							var namesMatch = propDef.name === propertyName || ("*" === propDef.name && noNonRisidualWithThatName);
 							var typesMatch = propDef.requiredType.toLowerCase() === propertyType.toLowerCase() || "undefined" === propDef.requiredType;
 							var isNotProtected = !propDef.protected;
 							canAddProperty = namesMatch && typesMatch && isNotProtected; 
@@ -364,21 +378,6 @@ de.sandroboehme.NodeTypeManager = (function() {
 							allApplChildNodeTypes[cnDef.name][nodeTypeName] = that.getNodeType(nodeTypeName);
 						}
 					});
-					/*
-					 * Residual definitions are also applicable to child node definitions that are specified
-					 * by name. Thats why the types that are applicable to the residual child node definitions
-					 * are also applicable to the child node definitions specified by name. The copying of the types
-					 * is done in the following code block.
-					 */
-					if (allApplChildNodeTypes["*"] != null) {
-						for (var applChildNodeName in allApplChildNodeTypes){
-							if ("*" != applChildNodeName) {
-								for (var residualChildNodeTypeIndex in allApplChildNodeTypes["*"]){
-									allApplChildNodeTypes[applChildNodeName][residualChildNodeTypeIndex]=allApplChildNodeTypes["*"][residualChildNodeTypeIndex];
-								}
-							}
-						}
-					}
 					return allApplChildNodeTypes;
 				}
 			};
