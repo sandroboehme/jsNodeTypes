@@ -52,7 +52,9 @@ de.sandroboehme.NodeTypeManager = (function() {
 	    	xhr = new ActiveXObject("MSXML2.XMLHTTP.3.0");
 	    }
 		xhr.open("GET", url, false/*not async*/);
-		xhr.overrideMimeType("application/json");
+		if (typeof xhr.overrideMimeType != "undefined"){
+			xhr.overrideMimeType("application/json");
+		}
 		xhr.onload = function (e) {
 		  if (xhr.readyState === 4) {
 		    if (xhr.status === 200) {
@@ -145,8 +147,8 @@ de.sandroboehme.NodeTypeManager = (function() {
 			  }
 			  return result;
 			};
-
-			}()); }
+		}()); 
+	}
 
 	/*
 	 * This function walks recursively through all parent node types and calls the processing function with the current node type
@@ -251,142 +253,145 @@ de.sandroboehme.NodeTypeManager = (function() {
 	}
 	
 	function initializeNodeTypes(that){
-		for (var ntIndex in Object.keys(that.nodeTypesJson)){
-			var nodeTypeName = Object.keys(that.nodeTypesJson)[ntIndex];
-			
-			if (typeof that.nodeTypesJson[nodeTypeName] != "undefined") {
-				that.nodeTypesJson[nodeTypeName].name = nodeTypeName;
-	
-				/*
-				 * Returns the child node definitions of the node type and those of all inherited node types.
-				 * Definitions with the same child node name are returned if they differ in any other attribute.
-				 */
-				that.nodeTypesJson[nodeTypeName].getAllChildNodeDefinitions = function(){
-					var allCollectedChildNodeDefs = [];
-					var allCollectedChildNodeDefHashes = [];
-					processNodeTypeGraph.call(that, this, 'declaredSupertypes', function(currentNodeType){
-						if (currentNodeType.declaredChildNodeDefinitions == null) return;
-						for (var childNodeDefIndex in currentNodeType.declaredChildNodeDefinitions) {
-							var childNodeDef = currentNodeType.declaredChildNodeDefinitions[childNodeDefIndex];
-							var childNodeDefName = childNodeDef.name;
-							var hashCode = childNodeDef.hashCode();
-							// in case the child has the same child node definition as its parent (supertype)
-							var processed = allCollectedChildNodeDefHashes.indexOf(hashCode) >= 0;
-							if (!processed){
-								allCollectedChildNodeDefHashes.push(hashCode);
-								allCollectedChildNodeDefs.push(childNodeDef);
+		try {
+			for (var ntIndex in Object.keys(that.nodeTypesJson)){
+				var nodeTypeName = Object.keys(that.nodeTypesJson)[ntIndex];
+				
+				if (typeof that.nodeTypesJson[nodeTypeName] != "undefined") {
+					that.nodeTypesJson[nodeTypeName].name = nodeTypeName;
+		
+					/*
+					 * Returns the child node definitions of the node type and those of all inherited node types.
+					 * Definitions with the same child node name are returned if they differ in any other attribute.
+					 */
+					that.nodeTypesJson[nodeTypeName].getAllChildNodeDefinitions = function(){
+						var allCollectedChildNodeDefs = [];
+						var allCollectedChildNodeDefHashes = [];
+						processNodeTypeGraph.call(that, this, 'declaredSupertypes', function(currentNodeType){
+							if (currentNodeType.declaredChildNodeDefinitions == null) return;
+							for (var childNodeDefIndex in currentNodeType.declaredChildNodeDefinitions) {
+								var childNodeDef = currentNodeType.declaredChildNodeDefinitions[childNodeDefIndex];
+								var childNodeDefName = childNodeDef.name;
+								var hashCode = childNodeDef.hashCode();
+								// in case the child has the same child node definition as its parent (supertype)
+								var processed = allCollectedChildNodeDefHashes.indexOf(hashCode) >= 0;
+								if (!processed){
+									allCollectedChildNodeDefHashes.push(hashCode);
+									allCollectedChildNodeDefs.push(childNodeDef);
+								}
 							}
-						}
-					}); 
-					return allCollectedChildNodeDefs;
-				};
-				/*
-				 * Returns the property definitions of the node type and those of all inherited node types.
-				 * Definitions with the same property name are returned if they differ in any other attribute. 
-				 */
-				that.nodeTypesJson[nodeTypeName].getAllPropertyDefinitions = function(){
-					var allCollectedPropertyDefs = [];
-					var allCollectedPropertyDefHashes = [];
-					processNodeTypeGraph.call(that, this, 'declaredSupertypes', function(currentNodeType){
-						if (currentNodeType.declaredPropertyDefinitions == null) return;
-						for (var propertyDefIndex in currentNodeType.declaredPropertyDefinitions) {
-							var propertyDef = currentNodeType.declaredPropertyDefinitions[propertyDefIndex];
-							var propertyDefName = propertyDef.name;
-							var hashCode = propertyDef.hashCode();
-							// in case the child has the same property definition as its parent (supertype)
-							var processed = allCollectedPropertyDefHashes.indexOf(hashCode) >= 0;
-							if (!processed){
-								allCollectedPropertyDefHashes.push(hashCode);
-								allCollectedPropertyDefs.push(propertyDef);
+						}); 
+						return allCollectedChildNodeDefs;
+					};
+					/*
+					 * Returns the property definitions of the node type and those of all inherited node types.
+					 * Definitions with the same property name are returned if they differ in any other attribute. 
+					 */
+					that.nodeTypesJson[nodeTypeName].getAllPropertyDefinitions = function(){
+						var allCollectedPropertyDefs = [];
+						var allCollectedPropertyDefHashes = [];
+						processNodeTypeGraph.call(that, this, 'declaredSupertypes', function(currentNodeType){
+							if (currentNodeType.declaredPropertyDefinitions == null) return;
+							for (var propertyDefIndex in currentNodeType.declaredPropertyDefinitions) {
+								var propertyDef = currentNodeType.declaredPropertyDefinitions[propertyDefIndex];
+								var propertyDefName = propertyDef.name;
+								var hashCode = propertyDef.hashCode();
+								// in case the child has the same property definition as its parent (supertype)
+								var processed = allCollectedPropertyDefHashes.indexOf(hashCode) >= 0;
+								if (!processed){
+									allCollectedPropertyDefHashes.push(hashCode);
+									allCollectedPropertyDefs.push(propertyDef);
+								}
 							}
-						}
-					});
-					return allCollectedPropertyDefs;
-				};
-	
-				/*
-				 * Returns `true` if a node with the specified node name and node type can be added as a child node of the current node type. 
-				 * 
-				 * The first parameter is the string of the node name and 
-				 * the second parameter is a node type object (not a string).
-				 */
-				that.nodeTypesJson[nodeTypeName].canAddChildNode = function(nodeName, nodeTypeToAdd){
-					if (nodeName==null || nodeTypeToAdd==null) return false;
-					var allChildNodeDefNames = [];
-					processApplicableChildNodeTypes(that, this, function(cnDef, nodeTypeName){
-						if (cnDef.name === nodeName) {
-							allChildNodeDefNames.push(nodeName);
-						}
-					});
-					var canAddChildNode = false;
-					processApplicableChildNodeTypes(that, this, function(cnDef, nodeTypeName){
-						var noNonRisidualWithThatName = allChildNodeDefNames.indexOf(nodeName)<0;
-						var nodeNameMatches = (nodeName === cnDef.name) || ("*" === cnDef.name && noNonRisidualWithThatName); 
-						var canAddToCurrentCnDef = !cnDef.protected && nodeNameMatches && nodeTypeToAdd.name === nodeTypeName;
-						canAddChildNode = canAddChildNode || canAddToCurrentCnDef; 
-					});
-					return canAddChildNode;
-				}
-	
-				/*
-				 * Returns `true` if a property with the specified name and type can be to the current node type. 
-				 * 
-				 * The first parameter is the string of the property name and 
-				 * the second parameter is the property type (case insensitive).
-				 */
-				that.nodeTypesJson[nodeTypeName].canAddProperty = function(propertyName, propertyType){
-					if (propertyName == null || propertyType == null) return false;
-					var allPropertyDefNames = [];
-					processNodeTypeGraph.call(that, this, 'declaredSupertypes', function(currentNodeType){
-						if (currentNodeType.declaredPropertyDefinitions == null) return;
-					    for (var propDefIndex in currentNodeType.declaredPropertyDefinitions) {
-							var propDef = currentNodeType.declaredPropertyDefinitions[propDefIndex];
-							allPropertyDefNames.push(propDef.name);
-					    }
-					}); 
-					var canAddProperty = false;
-					processNodeTypeGraph.call(that, this, 'declaredSupertypes', function(currentNodeType){
-						if (currentNodeType.declaredPropertyDefinitions == null) return;
-					    for (var propDefIndex=0; canAddProperty === false && propDefIndex < currentNodeType.declaredPropertyDefinitions.length; propDefIndex++) {
-							var propDef = currentNodeType.declaredPropertyDefinitions[propDefIndex];
-							var noNonRisidualWithThatName = allPropertyDefNames.indexOf(propertyName)<0;
-							var namesMatch = propDef.name === propertyName || ("*" === propDef.name && noNonRisidualWithThatName);
-							var typesMatch = propDef.requiredType.toLowerCase() === propertyType.toLowerCase() || "undefined" === propDef.requiredType;
-							var isNotProtected = !propDef.protected;
-							canAddProperty = namesMatch && typesMatch && isNotProtected; 
-					    }
-					}); 
-					return canAddProperty;
+						});
+						return allCollectedPropertyDefs;
+					};
+		
+					/*
+					 * Returns `true` if a node with the specified node name and node type can be added as a child node of the current node type. 
+					 * 
+					 * The first parameter is the string of the node name and 
+					 * the second parameter is a node type object (not a string).
+					 */
+					that.nodeTypesJson[nodeTypeName].canAddChildNode = function(nodeName, nodeTypeToAdd){
+						if (nodeName==null || nodeTypeToAdd==null) return false;
+						var allChildNodeDefNames = [];
+						processApplicableChildNodeTypes(that, this, function(cnDef, nodeTypeName){
+							if (cnDef.name === nodeName) {
+								allChildNodeDefNames.push(nodeName);
+							}
+						});
+						var canAddChildNode = false;
+						processApplicableChildNodeTypes(that, this, function(cnDef, nodeTypeName){
+							var noNonRisidualWithThatName = allChildNodeDefNames.indexOf(nodeName)<0;
+							var nodeNameMatches = (nodeName === cnDef.name) || ("*" === cnDef.name && noNonRisidualWithThatName); 
+							var canAddToCurrentCnDef = !cnDef.protected && nodeNameMatches && nodeTypeToAdd.name === nodeTypeName;
+							canAddChildNode = canAddChildNode || canAddToCurrentCnDef; 
+						});
+						return canAddChildNode;
+					}
+		
+					/*
+					 * Returns `true` if a property with the specified name and type can be to the current node type. 
+					 * 
+					 * The first parameter is the string of the property name and 
+					 * the second parameter is the property type (case insensitive).
+					 */
+					that.nodeTypesJson[nodeTypeName].canAddProperty = function(propertyName, propertyType){
+						if (propertyName == null || propertyType == null) return false;
+						var allPropertyDefNames = [];
+						processNodeTypeGraph.call(that, this, 'declaredSupertypes', function(currentNodeType){
+							if (currentNodeType.declaredPropertyDefinitions == null) return;
+						    for (var propDefIndex in currentNodeType.declaredPropertyDefinitions) {
+								var propDef = currentNodeType.declaredPropertyDefinitions[propDefIndex];
+								allPropertyDefNames.push(propDef.name);
+						    }
+						}); 
+						var canAddProperty = false;
+						processNodeTypeGraph.call(that, this, 'declaredSupertypes', function(currentNodeType){
+							if (currentNodeType.declaredPropertyDefinitions == null) return;
+						    for (var propDefIndex=0; canAddProperty === false && propDefIndex < currentNodeType.declaredPropertyDefinitions.length; propDefIndex++) {
+								var propDef = currentNodeType.declaredPropertyDefinitions[propDefIndex];
+								var noNonRisidualWithThatName = allPropertyDefNames.indexOf(propertyName)<0;
+								var namesMatch = propDef.name === propertyName || ("*" === propDef.name && noNonRisidualWithThatName);
+								var typesMatch = propDef.requiredType.toLowerCase() === propertyType.toLowerCase() || "undefined" === propDef.requiredType;
+								var isNotProtected = !propDef.protected;
+								canAddProperty = namesMatch && typesMatch && isNotProtected; 
+						    }
+						}); 
+						return canAddProperty;
+					};
+					
+					/*
+					 * Returns all node types that can be used for child nodes of this node type and its super types.
+					 * If a child node definition specifies multiple required primary types an applicable node type has
+					 * to be a subtype of all of them. 
+					 * The parameter is a boolean that specifies if mixins should be included or not. If no parameter is passed 'true' is assumed and mixins are
+					 * returned as well.
+					 */
+					that.nodeTypesJson[nodeTypeName].getApplicableChildNodeTypes = function(includeMixins){
+						var allApplChildNodeTypes = {};
+						processApplicableChildNodeTypes(that, this, function(cnDef, nodeTypeName){
+							var nodeType = that.getNodeType(nodeTypeName);
+							if (typeof allApplChildNodeTypes[cnDef.name] === "undefined") {
+								allApplChildNodeTypes[cnDef.name] = {};
+							}
+							var includeAlsoMixins = typeof includeMixins === "undefined" || includeMixins;
+							if (nodeType.mixin === true && includeAlsoMixins || !nodeType.mixin){
+								allApplChildNodeTypes[cnDef.name][nodeTypeName] = that.getNodeType(nodeTypeName);
+							}
+						});
+						return allApplChildNodeTypes;
+					}
 				};
 				
-				/*
-				 * Returns all node types that can be used for child nodes of this node type and its super types.
-				 * If a child node definition specifies multiple required primary types an applicable node type has
-				 * to be a subtype of all of them. 
-				 * The parameter is a boolean that specifies if mixins should be included or not. If no parameter is passed 'true' is assumed and mixins are
-				 * returned as well.
-				 */
-				that.nodeTypesJson[nodeTypeName].getApplicableChildNodeTypes = function(includeMixins){
-					var allApplChildNodeTypes = {};
-					processApplicableChildNodeTypes(that, this, function(cnDef, nodeTypeName){
-						var nodeType = that.getNodeType(nodeTypeName);
-						if (typeof allApplChildNodeTypes[cnDef.name] === "undefined") {
-							allApplChildNodeTypes[cnDef.name] = {};
-						}
-						var includeAlsoMixins = typeof includeMixins === "undefined" || includeMixins;
-						if (nodeType.mixin === true && includeAlsoMixins || !nodeType.mixin){
-							allApplChildNodeTypes[cnDef.name][nodeTypeName] = that.getNodeType(nodeTypeName);
-						}
-					});
-					return allApplChildNodeTypes;
-				}
-			};
-			
-			setDefaults.call(that, that.nodeTypesJson[nodeTypeName]);
-			initializeChildNodeDefs.call(that);
-			initializePropertyDefs.call(that);
-		}
-
+				setDefaults.call(that, that.nodeTypesJson[nodeTypeName]);
+				initializeChildNodeDefs.call(that);
+				initializePropertyDefs.call(that);
+			}
+		} catch (e){
+			console.log("Error, the node types JSON is not an object"); 
+		};
 		function itemHashCode(item){
 			var hash = "";
 			hash += item.name;
