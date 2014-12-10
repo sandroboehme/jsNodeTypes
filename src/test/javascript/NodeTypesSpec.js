@@ -547,7 +547,7 @@ describe('The Node Type Manager', function() {
 		});			
 	});
 
-	describe('returns in getApplicableChildNodeTypes()', function () {
+	describe('returns in getApplicableCnTypesPerCnDef()', function () {
 		/* adding a keySize function to Object */
 		if (typeof Object.keySize === "undefined") {
 			Object.keySize = function(obj) {
@@ -740,7 +740,7 @@ describe('The Node Type Manager', function() {
 			// visualization of the test datastructure
 			
 			var ntManager = new de.sandroboehme.NodeTypeManager(settings);
-			var applicableCnTypes = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypes();
+			var applicableCnTypes = ntManager.getNodeType("aNodeType").getApplicableCnTypesPerCnDef();
 	
 			it('generally', function() {
 				expect(applicableCnTypes!=null).toBe(true);
@@ -819,7 +819,7 @@ describe('The Node Type Manager', function() {
 			};
 	
 			var ntManager = new de.sandroboehme.NodeTypeManager(settings);
-			var applicableCnTypes = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypes();
+			var applicableCnTypes = ntManager.getNodeType("aNodeType").getApplicableCnTypesPerCnDef();
 
 			it('if required primary types is \'nt:base\'', function() {
 				expect(applicableCnTypes!=null).toBe(true);
@@ -859,7 +859,7 @@ describe('The Node Type Manager', function() {
 			};
 	
 			var ntManager = new de.sandroboehme.NodeTypeManager(settings);
-			var applicableCnTypes = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypes();
+			var applicableCnTypes = ntManager.getNodeType("aNodeType").getApplicableCnTypesPerCnDef();
 
 			expect(applicableCnTypes!=null).toBe(true);
 			expect(applicableCnTypes["cnDef1Name"]).toBeDefined(true);
@@ -907,7 +907,7 @@ describe('The Node Type Manager', function() {
 			};
 	
 			var ntManager = new de.sandroboehme.NodeTypeManager(settings);
-			var applicableCnTypesWithMixin = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypes(true);
+			var applicableCnTypesWithMixin = ntManager.getNodeType("aNodeType").getApplicableCnTypesPerCnDef(true);
 
 			expect(applicableCnTypesWithMixin!=null).toBe(true);
 			expect(applicableCnTypesWithMixin["cnDef1Name"]).toBeDefined(true);
@@ -922,7 +922,7 @@ describe('The Node Type Manager', function() {
 			expect(Object.keySize(applicableCnTypesWithMixin["*"])).toBe(1);
 			
 
-			var applicableCnTypesWithoutMixin = ntManager.getNodeType("aNodeType").getApplicableChildNodeTypes(false);
+			var applicableCnTypesWithoutMixin = ntManager.getNodeType("aNodeType").getApplicableCnTypesPerCnDef(false);
 
 			expect(applicableCnTypesWithoutMixin!=null).toBe(true);
 			expect(applicableCnTypesWithoutMixin["cnDef1Name"]).toBeDefined(true);

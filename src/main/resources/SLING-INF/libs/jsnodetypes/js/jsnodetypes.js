@@ -369,7 +369,7 @@ de.sandroboehme.NodeTypeManager = (function() {
 					 * The parameter is a boolean that specifies if mixins should be included or not. If no parameter is passed 'true' is assumed and mixins are
 					 * returned as well.
 					 */
-					that.nodeTypesJson[nodeTypeName].getApplicableChildNodeTypes = function(includeMixins){
+					that.nodeTypesJson[nodeTypeName].getApplicableCnTypesPerCnDef = function(includeMixins){
 						var allApplChildNodeTypes = {};
 						processApplicableChildNodeTypes(that, this, function(cnDef, nodeTypeName){
 							var nodeType = that.getNodeType(nodeTypeName);

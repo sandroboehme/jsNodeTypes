@@ -120,7 +120,7 @@ function loadApplicableChildNodeTypes(){
 	var ntJson = getNTJson();
 	if (ntJson != null){
 		var includeMixins = document.getElementById("includeMixins").checked;
-		var applicableChildNodeTypes = ntJson.getApplicableChildNodeTypes(includeMixins);
+		var applicableChildNodeTypes = ntJson.getApplicableCnTypesPerCnDef(includeMixins);
 		document.getElementById("ntMethodResult").innerHTML=JSON.stringify(applicableChildNodeTypes, null, 4);
 	}
 };
@@ -188,7 +188,7 @@ function canAddProperty(){
 				<span class="doc"><br>That method returns `true` if a property with the specified name and type can be to the current node type. The residual definitions and undefined types are considered.<br/>The <strong>first parameter is the string</strong> of the property name and the <strong>second parameter is the property type</strong> (case insensitive).</span>
 			</li>
 			<li>
-				<input type="button" value="getApplicableChildNodeTypes()" onclick="loadApplicableChildNodeTypes();"/>
+				<input type="button" value="getApplicableCnTypesPerCnDef()" onclick="loadApplicableChildNodeTypes();"/>
 					(<input type="checkbox" value="includeMixins" id="includeMixins" class="parameter"/> includeMixins);
 				<span class="doc"><br>Returns all node types that can be used for child nodes of this node type and its super types.<br/>If a child node definition specifies multiple required primary types, only node types that are subtypes of all of them are applicable.</br>The keys on the first level are the names of the child node definitions. Its values / the keys on the second level contain the node type names and its values in turn contain the node type definition itself. The <strong>parameter is a boolean</strong> and specifies if mixin types should be included in the result.</span>
 			</li>
@@ -239,6 +239,11 @@ var canAddChildNode = firstNodeType.canAddChildNode("myNodeName", nodeTypesArray
 		</ol>
 		<h2>Version History</h2>
 		<ul>
+			<li><strong>4.0.1</strong>
+				<ul>
+					<li><strong>Non backwards compatible change:</strong>Renamed getApplicableChildNodeTypes() to getApplicableCnTypesPerCnDef() to allow other similar methods and still have no overlapping meanings.</li>
+				</ul>
+			</li>
 			<li><strong>3.0.2</strong>
 				<ul>
 					<li>Fixed canAddChildNode() to check node name and node type combination and to return 'true' also for subtypes of a requiredPrimaryType.</li>
